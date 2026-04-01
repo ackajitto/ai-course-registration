@@ -13,27 +13,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Chosen Palette: Warm Saffron/Amber tones -->
-    <!-- Application Structure Plan: 
-         - Modular navigation using simple JS state.
-         - Robust table with search and sort by Vassa.
-         - Walk-in registration with auto-incrementing ID.
-         - Profile view and Photo/WiFi view with 2-space name spacing.
-         - Export functionality for budget reporting.
-    -->
-    <!-- Visualization & Content Choices: 
-         - Donut chart for daily attendance ratio.
-         - Responsive Tailwind grid for dashboard cards.
-         - Clean white-space and professional typography.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-
     <style>
         body {
             font-family: 'Kanit', sans-serif;
             background-color: #fefce8; /* amber-50 */
         }
-        
         .chart-container {
             position: relative;
             width: 100%;
@@ -43,19 +27,15 @@
             height: 30vh;
             max-height: 350px;
         }
-
         .hidden-view {
             display: none !important;
         }
-
         .large-checkbox {
             width: 1.5rem;
             height: 1.5rem;
             cursor: pointer;
             accent-color: #f97316;
         }
-
-        /* Ensure double spaces are rendered in HTML */
         .name-display {
             white-space: pre-wrap;
         }
@@ -65,8 +45,9 @@
 
     <!-- Navigation Bar -->
     <nav class="bg-orange-600 text-white shadow-md p-4 flex flex-wrap justify-between items-center shrink-0 z-40 gap-4">
-        <div class="text-xl md:text-2xl font-semibold flex items-center gap-2 whitespace-nowrap">
+        <div class="text-xl md:text-2xl font-semibold flex items-center gap-3 whitespace-nowrap">
             <span>📝</span> ระบบลงทะเบียน
+            <span id="sync-status" class="text-sm bg-orange-800 px-2 py-1 rounded-full text-orange-200">กำลังเชื่อมต่อฐานข้อมูล...</span>
         </div>
         <div class="flex gap-2 md:gap-4 flex-wrap justify-end">
             <button onclick="openWalkInModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:px-4 md:py-2 rounded transition font-medium text-sm md:text-base whitespace-nowrap shadow-md border border-blue-500">
@@ -120,7 +101,7 @@
                         <!-- Rows populated by JS -->
                     </tbody>
                 </table>
-                <div id="noResultsMsg" class="hidden text-center py-8 text-gray-500">ไม่พบข้อมูลที่ค้นหา</div>
+                <div id="noResultsMsg" class="hidden text-center py-8 text-gray-500">ไม่พบข้อมูลที่ค้นหา หรือระบบยังไม่มีข้อมูล (กรุณานำเข้า CSV)</div>
             </div>
         </section>
 
@@ -133,18 +114,21 @@
                     <h1 class="text-2xl md:text-3xl font-bold text-orange-800 mb-2">สรุปผลการลงทะเบียน</h1>
                     <p class="text-gray-600">สถิติและข้อมูลผู้เข้าร่วมเพื่อการทำรายงาน</p>
                 </div>
-                <div class="flex flex-wrap gap-2">
-                    <!-- ซ่อน Input File ไว้แล้วใช้ปุ่มกดเรียกแทน -->
+                <div class="flex flex-wrap gap-2 items-center">
                     <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="importCSV(event)">
+                    <!-- ปุ่มจำลองข้อมูลสำหรับทดสอบระบบ -->
+                    <button onclick="generateMockData()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg shadow-md font-medium text-sm transition mr-4" title="สร้างรายชื่อตัวอย่างเพื่อทดสอบ">
+                        🛠️ ทดสอบ 50 รายชื่อ
+                    </button>
+
                     <button onclick="document.getElementById('csvFileInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 md:px-6 rounded-lg shadow-md font-medium text-base md:text-lg flex items-center gap-2 transition">
                         <span>📤</span> เพิ่มข้อมูล (CSV)
                     </button>
                     <button onclick="exportCSV()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-3 md:px-6 rounded-lg shadow-md font-medium text-base md:text-lg flex items-center gap-2 transition">
                         <span>📥</span> ดึงข้อมูล (CSV / Excel)
                     </button>
-                    <!-- ปุ่มล้างข้อมูล -->
                     <button onclick="resetData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-3 md:px-6 rounded-lg shadow-md font-medium text-base md:text-lg flex items-center gap-2 transition">
-                        <span>🗑️</span> ล้างข้อมูลทั้งหมด
+                        <span>🗑️</span> ล้างข้อมูล
                     </button>
                 </div>
             </div>
@@ -301,78 +285,98 @@
         </div>
     </div>
 
-    <script>
-        let currentWifiCounter = 1; 
+    <!-- ========================================== -->
+    <!-- FIREBASE & LOGIC -->
+    <!-- ========================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration setup
+        let app, auth, db, user, attendeesRef;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        try {
+            const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+            const firebaseConfig = JSON.parse(firebaseConfigStr);
+            if (Object.keys(firebaseConfig).length > 0) {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                attendeesRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendees');
+            } else {
+                document.getElementById('sync-status').innerText = 'ทำงานแบบออฟไลน์';
+                document.getElementById('sync-status').className = 'text-sm bg-gray-600 px-2 py-1 rounded-full text-gray-200';
+            }
+        } catch (e) {
+            console.warn("ไม่สามารถโหลดการตั้งค่าฐานข้อมูลได้ ระบบทำงานในโหมดออฟไลน์", e);
+        }
+
+        // Global State
+        let attendees = [];
         let chartInstance = null;
         let currentPhotoPersonId = null; 
         let isSortedByVassaDesc = false;
 
-        const firstNames = ["กิตติ", "วิชาญ", "ประเสริฐ", "สมศักดิ์", "วิชัย", "สมชาย", "มานพ", "อำนวย", "สุชาติ", "สมเกียรติ", "ณรงค์", "ธวัชชัย", "สมบูรณ์", "พรชัย", "เจริญ"];
-        const lastNames = ["รักสงบ", "สิริจนฺโท", "ธมฺมทินฺโน", "ชุติมนฺโต", "ฐิตธมฺโม", "เตชวโร", "สุสิริ", "ปสาทิโก", "โชติโก", "สุปญฺโญ", "ใจดี", "มีสุข", "บุญมาก", "ปญฺญาคโม"];
-        const temples = ["วัดระฆัง", "วัดอรุณราชวราราม", "วัดพระเชตุพน", "วัดสระเกศ", "วัดบวรนิเวศ", "วัดเบญจมบพิตร", "วัดสุทัศน์", "วัดมหาธาตุ", "วัดปากน้ำ", "วัดไตรมิตร"];
-        const provs = ["กรุงเทพฯ", "อยุธยา", "ปทุมธานี", "นครปฐม", "นนทบุรี", "สมุทรปราการ", "ชลบุรี", "เชียงใหม่", "ขอนแก่น", "สงขลา"];
-        
-        const monkPrefixes = ["พระมหา", "พระครู", "พระอธิการ", "พระสมุห์", "พระใบฎีกา", "พระ"];
-        const layPrefixes = ["นาย", "นาง", "นางสาว", "ดร.", "ผศ."];
-        const allPrefixes = [...monkPrefixes, ...layPrefixes];
-
-        let attendees = [];
-        for (let i = 1; i <= 50; i++) {
-            let regIdNum = i.toString().padStart(3, '0');
-            let pref = allPrefixes[Math.floor(Math.random() * allPrefixes.length)];
-            let isMonk = monkPrefixes.includes(pref);
-            attendees.push({
-                id: i, regId: `DCI02${regIdNum}`, 
-                vassa: isMonk ? Math.floor(Math.random() * 30) + 1 : null,
-                phone: `08${Math.floor(Math.random() * 10000000).toString().padStart(8, '0')}`,
-                prefix: pref,
-                firstName: firstNames[Math.floor(Math.random() * firstNames.length)],
-                lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
-                temple: temples[Math.floor(Math.random() * temples.length)],
-                province: provs[Math.floor(Math.random() * provs.length)],
-                day1: false, day2: false, wifi: null, isNew: false
-            });
-        }
-
-        function init() { renderTable(attendees); }
-
-        function toggleSortVassa() {
-            isSortedByVassaDesc = !isSortedByVassaDesc;
-            const icon = document.getElementById('sort-vassa-icon');
-            if (isSortedByVassaDesc) {
-                attendees.sort((a, b) => (b.vassa || 0) - (a.vassa || 0));
-                icon.innerText = '🔼';
-            } else {
-                attendees.sort((a, b) => b.id - a.id);
-                icon.innerText = '🔽';
+        // Initialize App & Auth
+        async function initAuth() {
+            if (!auth) return;
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch(e) {
+                console.error("Auth error", e);
             }
-            handleSearch();
         }
 
-        function switchView(name) {
-            document.getElementById('view-registration').classList.toggle('hidden-view', name !== 'registration');
-            document.getElementById('view-dashboard').classList.toggle('hidden-view', name !== 'dashboard');
-            document.getElementById('nav-reg').className = name === 'registration' ? 'bg-orange-700 text-white px-4 py-2 rounded transition font-medium' : 'hover:bg-orange-500 px-4 py-2 rounded transition font-medium';
-            document.getElementById('nav-dash').className = name === 'dashboard' ? 'bg-orange-700 text-white px-4 py-2 rounded transition font-medium' : 'hover:bg-orange-500 px-4 py-2 rounded transition font-medium';
-            if (name === 'dashboard') updateDashboard();
+        if (auth) {
+            initAuth();
+            onAuthStateChanged(auth, (currentUser) => {
+                user = currentUser;
+                if (user && attendeesRef) {
+                    document.getElementById('sync-status').innerText = 'เชื่อมต่อระบบ Cloud สำเร็จ 🟢';
+                    document.getElementById('sync-status').className = 'text-sm bg-green-600 px-2 py-1 rounded-full text-white shadow-inner';
+                    
+                    // Listen for real-time changes
+                    onSnapshot(attendeesRef, (snapshot) => {
+                        const newData = [];
+                        snapshot.forEach(docSnap => {
+                            newData.push(docSnap.data());
+                        });
+                        attendees = newData;
+                        window.handleSearch();
+                        if (!document.getElementById('view-dashboard').classList.contains('hidden-view')) {
+                            window.updateDashboard();
+                        }
+                    }, (error) => {
+                        console.error("Snapshot error:", error);
+                        document.getElementById('sync-status').innerText = 'การซิงค์มีปัญหา 🔴';
+                    });
+                }
+            });
         }
 
         // Helper to construct name with 2-space gap
         function getFullName(p) {
-            // Note: Template literal with 2 spaces for visual and CSV consistency
             return `${p.prefix} ${p.firstName}  ${p.lastName}`;
         }
 
-        function renderTable(list) {
+        // Render Table
+        window.renderTable = function(list) {
             const tbody = document.getElementById('tableBody');
             const noRes = document.getElementById('noResultsMsg');
             tbody.innerHTML = '';
             if (list.length === 0) { noRes.classList.remove('hidden'); return; }
             noRes.classList.add('hidden');
+            
             list.forEach((p, idx) => {
                 const row = document.createElement('tr');
                 row.className = "hover:bg-orange-50 transition-colors cursor-pointer " + (p.isNew ? "bg-blue-50" : "");
-                row.onclick = () => openProfileView(p.id);
+                row.onclick = () => window.openProfileView(p.id);
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${idx + 1}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-orange-700">${p.regId}</td>
@@ -381,79 +385,95 @@
                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">${p.phone}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.temple}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.province}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day1 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration(${p.id}, 1, this.checked)"></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day2 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration(${p.id}, 2, this.checked)"></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day1 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration('${p.id}', 1, this.checked)"></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day2 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration('${p.id}', 2, this.checked)"></td>
                     <td class="px-6 py-4 whitespace-nowrap text-center" id="wifi-cell-${p.id}">${p.wifi ? `<span class="bg-gray-800 text-yellow-400 font-mono px-2 py-1 rounded text-sm">${p.wifi}</span>` : `<span class="text-gray-400">-</span>`}</td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        function handleSearch() {
+        // View Toggles
+        window.switchView = function(name) {
+            document.getElementById('view-registration').classList.toggle('hidden-view', name !== 'registration');
+            document.getElementById('view-dashboard').classList.toggle('hidden-view', name !== 'dashboard');
+            document.getElementById('nav-reg').className = name === 'registration' ? 'bg-orange-700 text-white px-4 py-2 rounded transition font-medium text-sm md:text-base' : 'hover:bg-orange-500 px-4 py-2 rounded transition font-medium text-sm md:text-base';
+            document.getElementById('nav-dash').className = name === 'dashboard' ? 'bg-orange-700 text-white px-4 py-2 rounded transition font-medium text-sm md:text-base' : 'hover:bg-orange-500 px-4 py-2 rounded transition font-medium text-sm md:text-base';
+            if (name === 'dashboard') window.updateDashboard();
+        }
+
+        // Search & Sort
+        window.handleSearch = function() {
             const q = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = attendees.filter(p => 
+            let filtered = attendees.filter(p => 
                 getFullName(p).toLowerCase().includes(q) ||
                 p.temple.toLowerCase().includes(q) ||
                 p.province.toLowerCase().includes(q) ||
                 p.regId.toLowerCase().includes(q) ||
                 p.phone.includes(q)
             );
-            renderTable(filtered);
+
+            if (isSortedByVassaDesc) {
+                filtered.sort((a, b) => (b.vassa || 0) - (a.vassa || 0));
+            } else {
+                // Default sort by string ID (Timestamp) descending (newest on top)
+                filtered.sort((a, b) => String(b.id).localeCompare(String(a.id)));
+            }
+
+            window.renderTable(filtered);
         }
 
-        function openWalkInModal() {
-            document.getElementById('walkin-prefix').value = '';
-            document.getElementById('walkin-firstname').value = '';
-            document.getElementById('walkin-lastname').value = '';
-            document.getElementById('walkin-vassa').value = '';
-            document.getElementById('walkin-phone').value = '';
-            document.getElementById('walkin-temple').value = '';
-            document.getElementById('walkin-province').value = '';
-            
-            let maxN = 0;
-            let pref = "DCI02";
-            attendees.forEach(p => {
-                const m = p.regId.match(/^(.*?)(\d+)$/);
-                if (m) { const n = parseInt(m[2], 10); if (n > maxN) { maxN = n; pref = m[1]; } }
-            });
-            document.getElementById('walkin-regId').value = `${pref}${(maxN + 1).toString().padStart(3, '0')}`;
-            document.getElementById('walkin-overlay').classList.remove('hidden-view');
+        window.toggleSortVassa = function() {
+            isSortedByVassaDesc = !isSortedByVassaDesc;
+            const icon = document.getElementById('sort-vassa-icon');
+            icon.innerText = isSortedByVassaDesc ? '🔼' : '🔽';
+            window.handleSearch();
         }
 
-        function saveWalkIn() {
-            const rid = document.getElementById('walkin-regId').value.trim();
-            const pre = document.getElementById('walkin-prefix').value.trim();
-            const fn = document.getElementById('walkin-firstname').value.trim();
-            const ln = document.getElementById('walkin-lastname').value.trim();
-            const vassa = document.getElementById('walkin-vassa').value.trim();
-            const temp = document.getElementById('walkin-temple').value.trim();
-            const prov = document.getElementById('walkin-province').value.trim();
-            if (!fn || !temp || !prov) { alert("กรุณากรอกข้อมูลให้ครบถ้วน"); return; }
-            attendees.unshift({
-                id: Date.now(), regId: rid, prefix: pre, firstName: fn, lastName: ln,
-                vassa: vassa ? parseInt(vassa, 10) : null,
-                phone: document.getElementById('walkin-phone').value || "-",
-                temple: temp, province: prov, day1: false, day2: false, wifi: null, isNew: true
-            });
-            closeWalkInModal(); handleSearch();
-        }
-
-        function handleRegistration(id, day, check) {
-            const p = attendees.find(x => x.id === id);
+        // --- Interaction Logic ---
+        window.handleRegistration = function(personId, dayNumber, isChecked) {
+            const p = attendees.find(x => x.id === personId);
             if (!p) return;
-            if (day === 1) p.day1 = check; else p.day2 = check;
-            if (check && !p.wifi) {
-                if (currentWifiCounter <= 200) {
-                    p.wifi = `AI${currentWifiCounter.toString().padStart(2, '0')}`;
-                    currentWifiCounter++;
-                    openPhotoView(p);
-                } else alert("รหัส WiFi เต็มแล้ว");
-            } else if (check) openPhotoView(p);
-            const cell = document.getElementById(`wifi-cell-${p.id}`);
-            if(cell) cell.innerHTML = p.wifi ? `<span class="bg-gray-800 text-yellow-400 font-mono px-2 py-1 rounded text-sm">${p.wifi}</span>` : `<span class="text-gray-400">-</span>`;
+            
+            let updated = { ...p };
+            if (dayNumber === 1) updated.day1 = isChecked; 
+            else updated.day2 = isChecked;
+
+            let showPhoto = false;
+
+            if (isChecked && !updated.wifi) {
+                let maxWifiNum = 0;
+                attendees.forEach(x => {
+                    if (x.wifi && x.wifi.startsWith('AI')) {
+                        const n = parseInt(x.wifi.replace('AI', ''), 10);
+                        if (!isNaN(n) && n > maxWifiNum) maxWifiNum = n;
+                    }
+                });
+
+                if (maxWifiNum < 200) {
+                    updated.wifi = `AI${(maxWifiNum + 1).toString().padStart(2, '0')}`;
+                    showPhoto = true;
+                } else {
+                    alert("รหัส WiFi ในระบบเต็มแล้ว (AI200)");
+                }
+            } else if (isChecked && updated.wifi) {
+                showPhoto = true;
+            }
+
+            // Sync to Firestore
+            if (user && attendeesRef) {
+                setDoc(doc(attendeesRef, updated.id.toString()), updated).catch(e => console.error(e));
+            } else {
+                // Offline fallback
+                Object.assign(p, updated);
+                window.handleSearch();
+            }
+
+            if (showPhoto) window.openPhotoView(updated);
         }
 
-        function openProfileView(id) {
+        // --- Profile Views ---
+        window.openProfileView = function(id) {
             const p = attendees.find(x => x.id === id);
             if (!p) return;
             document.getElementById('profile-reg-id').innerText = p.regId;
@@ -463,7 +483,7 @@
             document.getElementById('profile-overlay').classList.remove('hidden-view');
         }
 
-        function openPhotoView(p) {
+        window.openPhotoView = function(p) {
             currentPhotoPersonId = p.id;
             document.getElementById('photo-reg-id').innerText = p.regId;
             document.getElementById('photo-name').innerText = getFullName(p);
@@ -471,11 +491,11 @@
             document.getElementById('photo-province').innerText = p.province;
             document.getElementById('photo-wifi-user').innerText = p.wifi || 'N/A';
             document.getElementById('photo-wifi-pass').innerText = p.wifi || 'N/A';
-            togglePhotoEditMode(false);
+            window.togglePhotoEditMode(false);
             document.getElementById('photo-overlay').classList.remove('hidden-view');
         }
 
-        function togglePhotoEditMode(edit) {
+        window.togglePhotoEditMode = function(edit) {
             document.getElementById('photo-view-mode').classList.toggle('hidden-view', edit);
             document.getElementById('photo-edit-mode').classList.toggle('hidden-view', !edit);
             if (edit) {
@@ -488,21 +508,223 @@
             }
         }
 
-        function savePhotoProfile() {
+        window.savePhotoProfile = function() {
             const p = attendees.find(x => x.id === currentPhotoPersonId);
-            p.prefix = document.getElementById('photo-edit-prefix').value;
-            p.firstName = document.getElementById('photo-edit-firstname').value;
-            p.lastName = document.getElementById('photo-edit-lastname').value;
-            p.temple = document.getElementById('photo-edit-temple').value;
-            p.province = document.getElementById('photo-edit-province').value;
-            openPhotoView(p); handleSearch();
+            let updated = { ...p };
+            updated.prefix = document.getElementById('photo-edit-prefix').value.trim();
+            updated.firstName = document.getElementById('photo-edit-firstname').value.trim();
+            updated.lastName = document.getElementById('photo-edit-lastname').value.trim();
+            updated.temple = document.getElementById('photo-edit-temple').value.trim();
+            updated.province = document.getElementById('photo-edit-province').value.trim();
+            
+            if (user && attendeesRef) {
+                setDoc(doc(attendeesRef, updated.id.toString()), updated);
+            } else {
+                Object.assign(p, updated);
+            }
+            window.openPhotoView(updated); 
+            window.handleSearch();
         }
 
-        function closeWalkInModal() { document.getElementById('walkin-overlay').classList.add('hidden-view'); }
-        function closeProfileView() { document.getElementById('profile-overlay').classList.add('hidden-view'); }
-        function closePhotoView() { document.getElementById('photo-overlay').classList.add('hidden-view'); handleSearch(); }
+        window.closeProfileView = function() { document.getElementById('profile-overlay').classList.add('hidden-view'); }
+        window.closePhotoView = function() { document.getElementById('photo-overlay').classList.add('hidden-view'); }
 
-        function updateDashboard() {
+        // --- Walk-in Logic ---
+        window.openWalkInModal = function() {
+            document.getElementById('walkin-prefix').value = '';
+            document.getElementById('walkin-firstname').value = '';
+            document.getElementById('walkin-lastname').value = '';
+            document.getElementById('walkin-vassa').value = '';
+            document.getElementById('walkin-phone').value = '';
+            document.getElementById('walkin-temple').value = '';
+            document.getElementById('walkin-province').value = '';
+            
+            let maxN = 0; let pref = "DCI02";
+            attendees.forEach(p => {
+                const m = p.regId.match(/^(.*?)(\d+)$/);
+                if (m) { const n = parseInt(m[2], 10); if (n > maxN) { maxN = n; pref = m[1]; } }
+            });
+            document.getElementById('walkin-regId').value = `${pref}${(maxN + 1).toString().padStart(3, '0')}`;
+            document.getElementById('walkin-overlay').classList.remove('hidden-view');
+        }
+
+        window.saveWalkIn = function() {
+            const regId = document.getElementById('walkin-regId').value.trim();
+            const fn = document.getElementById('walkin-firstname').value.trim();
+            const temp = document.getElementById('walkin-temple').value.trim();
+            const prov = document.getElementById('walkin-province').value.trim();
+            if (!fn || !temp || !prov) { alert("กรุณากรอก ชื่อ, วัด และจังหวัด ให้ครบถ้วนครับ"); return; }
+            
+            const newId = Date.now().toString() + Math.random().toString().substr(2,4);
+            const vassaStr = document.getElementById('walkin-vassa').value.trim();
+            
+            const newPerson = {
+                id: newId, 
+                regId: regId || "WALK-000", 
+                prefix: document.getElementById('walkin-prefix').value.trim(), 
+                firstName: fn, 
+                lastName: document.getElementById('walkin-lastname').value.trim(),
+                vassa: vassaStr ? parseInt(vassaStr, 10) : null,
+                phone: document.getElementById('walkin-phone').value || "-",
+                temple: temp, 
+                province: prov, 
+                day1: false, 
+                day2: false, 
+                wifi: null, 
+                isNew: true
+            };
+
+            if (user && attendeesRef) {
+                setDoc(doc(attendeesRef, newId), newPerson);
+            } else {
+                attendees.unshift(newPerson);
+            }
+            
+            document.getElementById('searchInput').value = '';
+            window.closeWalkInModal(); 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.closeWalkInModal = function() { document.getElementById('walkin-overlay').classList.add('hidden-view'); }
+
+
+        // --- Data Import/Export/Reset/Mock ---
+        window.parseCSVLine = function(text) {
+            let ret = []; let inQuote = false; let value = '';
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"') {
+                    if (inQuote && text[i+1] === '"') { value += '"'; i++; } else inQuote = !inQuote;
+                } else if (char === ',' && !inQuote) { ret.push(value); value = '';
+                } else value += char;
+            }
+            ret.push(value); return ret;
+        }
+
+        window.importCSV = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split(/\r\n|\n/);
+                let addedCount = 0;
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    const cols = window.parseCSVLine(lines[i]);
+                    if (cols.length < 9) continue; 
+
+                    const regId = cols[1].trim();
+                    if (attendees.find(a => a.regId === regId)) continue;
+                    
+                    const fullName = cols[2].trim();
+                    let prefix = "", firstName = "", lastName = "";
+                    const nameParts = fullName.split("  ");
+                    if (nameParts.length >= 2) {
+                        lastName = nameParts.pop().trim();
+                        const firstParts = nameParts.join("  ").split(" ");
+                        prefix = firstParts[0].trim();
+                        firstName = firstParts.slice(1).join(" ").trim();
+                    } else {
+                        const parts = fullName.split(" ");
+                        prefix = parts[0] || ""; firstName = parts.slice(1).join(" ") || "";
+                    }
+
+                    const vassa = cols[3].trim() === '-' ? null : parseInt(cols[3].trim(), 10);
+                    const phone = cols[4].trim();
+                    const temple = cols[5].trim();
+                    const province = cols[6].trim();
+                    const day1 = cols[7].trim() === 'มา';
+                    const day2 = cols[8].trim() === 'มา';
+                    const wifi = (cols[9] && cols[9].trim() !== '-') ? cols[9].trim() : null;
+
+                    const newId = Date.now().toString() + Math.random().toString().substr(2,4) + i;
+                    const newPerson = {
+                        id: newId, regId, prefix, firstName, lastName,
+                        vassa: isNaN(vassa) ? null : vassa, phone, temple, province, day1, day2, wifi, isNew: true
+                    };
+
+                    if (user && attendeesRef) {
+                        setDoc(doc(attendeesRef, newId), newPerson);
+                    } else {
+                        attendees.unshift(newPerson);
+                    }
+                    addedCount++;
+                }
+                alert(`นำเข้าข้อมูลสำเร็จจำนวน ${addedCount} รายการ \n(ข้ามข้อมูลที่มีรหัสประจำตัวซ้ำในระบบ)`);
+                event.target.value = '';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            reader.readAsText(file);
+        }
+
+        window.exportCSV = function() {
+            let csv = "\uFEFFลำดับ,รหัสประจำตัว,ชื่อ - สกุล / ฉายา,พรรษา,เบอร์โทร,วัด,จังหวัด,วัน 1,วัน 2,WiFi\n";
+            // คัดลอกแล้วนำมาเรียงตามรหัสประจำตัว หรือ ID เวลาพิมพ์รายงาน
+            let exportData = [...attendees].sort((a,b) => String(a.regId).localeCompare(String(b.regId)));
+            
+            exportData.forEach((p, i) => {
+                const name = getFullName(p);
+                csv += `${i+1},${p.regId},"${name}",${p.vassa || '-'},${p.phone},${p.temple},${p.province},${p.day1?'มา':'ไม่'},${p.day2?'มา':'ไม่'},${p.wifi||'-'}\n`;
+            });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            link.download = "รายงานลงทะเบียน.csv";
+            link.click();
+        }
+
+        window.resetData = function() {
+            const confirmReset = confirm("คำเตือน: คุณแน่ใจหรือไม่ที่จะลบ 'รายชื่อและข้อมูลทั้งหมด' ออกจากระบบคลาวด์?\n\n* หากลบแล้วจะไม่สามารถกู้คืนได้ แนะนำให้ดึงข้อมูล (Export) เก็บไว้ก่อนครับ *");
+            if (confirmReset) {
+                if (user && attendeesRef) {
+                    attendees.forEach(p => {
+                        deleteDoc(doc(attendeesRef, p.id.toString()));
+                    });
+                } else {
+                    attendees = [];
+                    window.handleSearch();
+                }
+                alert("ดำเนินการลบข้อมูลทั้งหมดในระบบเรียบร้อยแล้วครับ");
+            }
+        }
+
+        window.generateMockData = function() {
+            if (!user || !attendeesRef) { alert('ต้องเชื่อมต่อ Cloud ก่อนครับ'); return; }
+            const firstNames = ["กิตติ", "วิชาญ", "ประเสริฐ", "สมศักดิ์", "วิชัย", "สมชาย", "มานพ"];
+            const lastNames = ["รักสงบ", "สิริจนฺโท", "ธมฺมทินฺโน", "ชุติมนฺโต", "ฐิตธมฺโม", "ใจดี"];
+            const temples = ["วัดระฆัง", "วัดอรุณราชวราราม", "วัดสระเกศ", "วัดบวรนิเวศ"];
+            const provs = ["กรุงเทพฯ", "อยุธยา", "ปทุมธานี", "นครปฐม"];
+            
+            let maxN = 0;
+            attendees.forEach(p => {
+                const m = p.regId.match(/^(.*?)(\d+)$/);
+                if (m) { const n = parseInt(m[2], 10); if (n > maxN) maxN = n; }
+            });
+
+            for (let i = 1; i <= 50; i++) {
+                let regIdNum = (maxN + i).toString().padStart(3, '0');
+                const newId = Date.now().toString() + Math.random().toString().substr(2,4) + i;
+                let isMonk = Math.random() > 0.3; // 70% พระ
+                const newPerson = {
+                    id: newId,
+                    regId: `DCI02${regIdNum}`,
+                    vassa: isMonk ? Math.floor(Math.random() * 30) + 1 : null,
+                    phone: `08${Math.floor(Math.random() * 10000000).toString().padStart(8, '0')}`,
+                    prefix: isMonk ? "พระมหา" : "นาย",
+                    firstName: firstNames[Math.floor(Math.random() * firstNames.length)],
+                    lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
+                    temple: temples[Math.floor(Math.random() * temples.length)],
+                    province: provs[Math.floor(Math.random() * provs.length)],
+                    day1: false, day2: false, wifi: null, isNew: false
+                };
+                setDoc(doc(attendeesRef, newId), newPerson);
+            }
+            alert("สร้างรายชื่อทดสอบเข้าระบบ 50 รูป/คน เรียบร้อยแล้วครับ");
+        }
+
+        // --- Dashboard Update ---
+        window.updateDashboard = function() {
             let t = 0, d1 = 0, d2 = 0;
             const regUsers = attendees.filter(p => {
                 if (p.day1 || p.day2) t++;
@@ -512,7 +734,15 @@
             document.getElementById('stat-total').innerText = t;
             document.getElementById('stat-day1').innerText = d1;
             document.getElementById('stat-day2').innerText = d2;
-            renderChart(d1, d2);
+            
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: ['วันที่ 1', 'วันที่ 2'], datasets: [{ data: [d1, d2], backgroundColor: ['rgba(249, 115, 22, 0.8)', 'rgba(34, 197, 94, 0.8)'], borderWidth: 1 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
             const body = document.getElementById('summaryTableBody');
             body.innerHTML = regUsers.map(p => `
                 <tr>
@@ -526,155 +756,10 @@
             `).join('');
         }
 
-        function renderChart(d1, d2) {
-            const ctx = document.getElementById('attendanceChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: { labels: ['วันที่ 1', 'วันที่ 2'], datasets: [{ data: [d1, d2], backgroundColor: ['rgba(249, 115, 22, 0.8)', 'rgba(34, 197, 94, 0.8)'], borderWidth: 1 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-            });
-        }
-
-        // ==========================================
-        // นำเข้าข้อมูลจาก CSV (IMPORT CSV)
-        // ==========================================
-        function importCSV(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = e.target.result;
-                const lines = text.split(/\r\n|\n/);
-                let addedCount = 0;
-                
-                // ข้ามบรรทัดแรก (บรรทัดส่วนหัวของตาราง)
-                for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
-                    
-                    const cols = parseCSVLine(lines[i]);
-                    if (cols.length < 9) continue; // ตรวจสอบความครบถ้วนของคอลัมน์
-
-                    const regId = cols[1].trim();
-                    
-                    // ป้องกันการนำเข้าข้อมูลซ้ำ เช็คจากรหัสประจำตัว
-                    if (attendees.find(a => a.regId === regId)) continue;
-                    
-                    const fullName = cols[2].trim();
-                    let prefix = "", firstName = "", lastName = "";
-                    
-                    // แยกชื่อและนามสกุลด้วย 2 เคาะ ตามที่ตั้งไว้ในระบบส่งออก
-                    const nameParts = fullName.split("  ");
-                    if (nameParts.length >= 2) {
-                        lastName = nameParts.pop().trim();
-                        const firstParts = nameParts.join("  ").split(" ");
-                        prefix = firstParts[0].trim();
-                        firstName = firstParts.slice(1).join(" ").trim();
-                    } else {
-                        const parts = fullName.split(" ");
-                        prefix = parts[0] || "";
-                        firstName = parts.slice(1).join(" ") || "";
-                    }
-
-                    const vassa = cols[3].trim() === '-' ? null : parseInt(cols[3].trim(), 10);
-                    const phone = cols[4].trim();
-                    const temple = cols[5].trim();
-                    const province = cols[6].trim();
-                    const day1 = cols[7].trim() === 'มา';
-                    const day2 = cols[8].trim() === 'มา';
-                    const wifi = (cols[9] && cols[9].trim() !== '-') ? cols[9].trim() : null;
-
-                    const newId = attendees.length > 0 ? Math.max(...attendees.map(p => p.id)) + 1 : 1;
-
-                    attendees.unshift({
-                        id: newId,
-                        regId: regId,
-                        prefix: prefix,
-                        firstName: firstName,
-                        lastName: lastName,
-                        vassa: isNaN(vassa) ? null : vassa,
-                        phone: phone,
-                        temple: temple,
-                        province: province,
-                        day1: day1,
-                        day2: day2,
-                        wifi: wifi,
-                        isNew: true // ใส่แท็กแจ้งว่าเป็นรายชื่อใหม่เพื่อไฮไลต์สี
-                    });
-                    addedCount++;
-                }
-
-                alert(`นำเข้าข้อมูลสำเร็จจำนวน ${addedCount} รายการ \n(ข้ามข้อมูลที่รหัสประจำตัวซ้ำในระบบเรียบร้อยแล้ว)`);
-                handleSearch();
-                if (!document.getElementById('view-dashboard').classList.contains('hidden-view')) {
-                    updateDashboard();
-                }
-                event.target.value = ''; // รีเซ็ตไฟล์เพื่อให้สามารถอัพโหลดไฟล์เดิมได้อีก
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            };
-            reader.readAsText(file);
-        }
-
-        // ตัวช่วยสำหรับแยกคอลัมน์ CSV กรณีที่ข้อมูลมีลูกน้ำ (,) ปะปนอยู่ข้างใน
-        function parseCSVLine(text) {
-            let ret = [];
-            let inQuote = false;
-            let value = '';
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                if (char === '"') {
-                    if (inQuote && text[i+1] === '"') {
-                        value += '"'; i++; // จัดการ Double Quotes ภายใน
-                    } else {
-                        inQuote = !inQuote;
-                    }
-                } else if (char === ',' && !inQuote) {
-                    ret.push(value);
-                    value = '';
-                } else {
-                    value += char;
-                }
-            }
-            ret.push(value);
-            return ret;
-        }
-
-        // ==========================================
-        // รีเซ็ตล้างข้อมูลทั้งหมด (RESET DATA)
-        // ==========================================
-        function resetData() {
-            const confirmReset = confirm("คำเตือน: คุณแน่ใจหรือไม่ที่จะลบ 'รายชื่อและข้อมูลทั้งหมด' ออกจากระบบ?\n\n* หากลบแล้วจะไม่สามารถกู้คืนได้ แนะนำให้ดึงข้อมูล (Export) เก็บไว้ก่อนครับ *");
-            
-            if (confirmReset) {
-                attendees = []; // ล้าง Array ข้อมูลทั้งหมด
-                currentWifiCounter = 1; // รีเซ็ตตัวนับ WiFi
-                
-                // รีเฟรชหน้าจอทั้งหมด
-                handleSearch();
-                
-                if (!document.getElementById('view-dashboard').classList.contains('hidden-view')) {
-                    updateDashboard();
-                }
-                
-                alert("ล้างข้อมูลทั้งหมดในระบบเรียบร้อยแล้วครับ");
-            }
-        }
-
-        function exportCSV() {
-            // Note: 2 spaces between First and Last name in CSV
-            let csv = "\uFEFFลำดับ,รหัสประจำตัว,ชื่อ - สกุล / ฉายา,พรรษา,เบอร์โทร,วัด,จังหวัด,วัน 1,วัน 2,WiFi\n";
-            attendees.forEach((p, i) => {
-                const name = getFullName(p);
-                csv += `${i+1},${p.regId},"${name}",${p.vassa || '-'},${p.phone},${p.temple},${p.province},${p.day1?'มา':'ไม่'},${p.day2?'มา':'ไม่'},${p.wifi||'-'}\n`;
-            });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-            link.download = "รายงานลงทะเบียน.csv";
-            link.click();
-        }
-
-        window.onload = init;
+        // Initial render fallback (will be overwritten by Firestore if online)
+        window.onload = () => {
+            window.renderTable(attendees);
+        };
     </script>
 </body>
 </html>
