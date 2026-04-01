@@ -37,7 +37,7 @@
             accent-color: #f97316;
         }
         .name-display {
-            white-space: pre-wrap;
+            white-space: pre; /* บังคับให้อยู่บรรทัดเดียวเสมอ และรักษาช่องว่าง 2 เคาะไว้ */
         }
     </style>
 </head>
@@ -225,61 +225,71 @@
     <!-- ========================================== -->
     <!-- OVERLAY 1: PROFILE DETAILS -->
     <!-- ========================================== -->
-    <div id="profile-overlay" class="fixed inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 z-50 hidden-view flex flex-col justify-center items-center p-8 overflow-y-auto">
-        <div class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-[3rem] shadow-2xl border-8 border-orange-200 p-12 md:p-20 relative text-center">
-            <button onclick="closeProfileView()" class="absolute top-8 right-8 bg-gray-200 hover:bg-red-100 hover:text-red-600 text-gray-600 rounded-full w-16 h-16 flex items-center justify-center text-3xl transition-colors duration-300 shadow-sm">✕</button>
-            <div class="bg-orange-100 inline-block px-10 py-3 rounded-2xl border-2 border-orange-300 mb-10 mt-4 shadow-inner">
-                <span class="text-3xl text-orange-800 mr-3 font-normal">รหัสประจำตัว:</span>
-                <span id="profile-reg-id" class="text-5xl md:text-6xl font-bold text-orange-600 tracking-widest"></span>
+    <div id="profile-overlay" class="fixed inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 z-50 hidden-view flex flex-col justify-center items-center p-4 md:p-8 overflow-x-hidden overflow-y-auto">
+        <!-- ขยายกรอบให้กว้างสูงสุด 95vw หรือ 1400px -->
+        <div class="w-full max-w-[95vw] xl:max-w-7xl 2xl:max-w-[1400px] bg-white/95 backdrop-blur-md rounded-[3rem] shadow-2xl border-8 border-orange-200 p-8 md:p-20 relative text-center">
+            <button onclick="closeProfileView()" class="absolute top-4 right-4 md:top-8 md:right-8 bg-gray-200 hover:bg-red-100 hover:text-red-600 text-gray-600 rounded-full w-12 h-12 md:w-16 md:h-16 flex items-center justify-center text-2xl md:text-3xl transition-colors duration-300 shadow-sm">✕</button>
+            
+            <div class="bg-orange-100 inline-block px-6 md:px-10 py-3 rounded-2xl border-2 border-orange-300 mb-8 md:mb-10 mt-4 shadow-inner">
+                <span class="text-2xl md:text-3xl text-orange-800 mr-3 font-normal">รหัสประจำตัว:</span>
+                <span id="profile-reg-id" class="text-4xl md:text-6xl font-bold text-orange-600 tracking-widest"></span>
             </div>
-            <h1 id="profile-name" class="name-display text-6xl md:text-8xl font-bold text-gray-800 mb-8 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-800 to-yellow-800"></h1>
+            
+            <!-- ใช้ clamp() เพื่อปรับลดขนาดตัวอักษรอัตโนมัติ ป้องกันการขึ้นบรรทัดใหม่ -->
+            <h1 id="profile-name" class="name-display w-full overflow-hidden text-ellipsis text-[clamp(1.8rem,5vw,6rem)] font-bold text-gray-800 mb-8 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-800 to-yellow-800"></h1>
+            
             <div class="w-32 h-2 bg-orange-300 mx-auto rounded-full mb-8"></div>
-            <h3 id="profile-temple" class="text-4xl md:text-5xl text-orange-700 font-medium mb-4"></h3>
-            <h4 id="profile-province" class="text-3xl md:text-4xl text-gray-600 font-normal"></h4>
+            <h3 id="profile-temple" class="text-3xl md:text-5xl text-orange-700 font-medium mb-4"></h3>
+            <h4 id="profile-province" class="text-2xl md:text-4xl text-gray-600 font-normal"></h4>
         </div>
     </div>
 
     <!-- ========================================== -->
     <!-- OVERLAY 2: PHOTO & WiFi VIEW -->
     <!-- ========================================== -->
-    <div id="photo-overlay" class="fixed inset-0 bg-white z-50 flex flex-col justify-center items-center hidden-view p-8 overflow-y-auto">
-        <div class="w-full max-w-4xl text-center flex flex-col gap-10">
-            <div class="text-green-600 text-3xl font-bold mb-4 flex items-center justify-center gap-2"><span>✅</span> ยืนยันการลงทะเบียนสำเร็จ</div>
-            <div id="photo-view-mode" class="flex flex-col gap-10">
-                <div class="bg-orange-50 border-4 border-orange-200 rounded-3xl p-10 shadow-lg relative mt-6">
-                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-orange-600 text-white px-10 py-3 rounded-full shadow-md border-4 border-white tracking-wider flex items-center gap-3 w-max">
-                        <span class="text-xl font-normal text-orange-200">รหัสประจำตัว:</span>
-                        <span id="photo-reg-id" class="font-bold text-4xl text-white"></span>
+    <div id="photo-overlay" class="fixed inset-0 bg-white z-50 flex flex-col justify-center items-center hidden-view p-4 md:p-8 overflow-x-hidden overflow-y-auto">
+        <div class="w-full max-w-[95vw] xl:max-w-6xl 2xl:max-w-[1200px] text-center flex flex-col gap-8 md:gap-10">
+            <div class="text-green-600 text-2xl md:text-3xl font-bold mb-2 md:mb-4 flex items-center justify-center gap-2"><span>✅</span> ยืนยันการลงทะเบียนสำเร็จ</div>
+            
+            <div id="photo-view-mode" class="flex flex-col gap-8 md:gap-10">
+                <div class="bg-orange-50 border-4 border-orange-200 rounded-3xl p-6 md:p-10 shadow-lg relative mt-6">
+                    <div class="absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 bg-orange-600 text-white px-6 md:px-10 py-2 md:py-3 rounded-full shadow-md border-4 border-white tracking-wider flex items-center gap-3 w-max">
+                        <span class="text-lg md:text-xl font-normal text-orange-200">รหัสประจำตัว:</span>
+                        <span id="photo-reg-id" class="font-bold text-2xl md:text-4xl text-white"></span>
                     </div>
-                    <h2 id="photo-name" class="name-display text-5xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight mt-8"></h2>
-                    <h3 id="photo-temple" class="text-3xl md:text-4xl text-orange-700 font-medium mb-2"></h3>
-                    <h4 id="photo-province" class="text-2xl md:text-3xl text-gray-500 mb-8"></h4>
-                    <button onclick="togglePhotoEditMode(true)" class="bg-white hover:bg-orange-100 text-orange-700 text-xl font-medium py-2 px-6 rounded-full transition shadow-sm border border-orange-200 inline-flex items-center gap-2"><span>✏️</span> แก้ไขข้อมูล</button>
+                    
+                    <!-- ใช้ clamp() เพื่อปรับลดขนาดตัวอักษรอัตโนมัติ ป้องกันการขึ้นบรรทัดใหม่ -->
+                    <h2 id="photo-name" class="name-display w-full overflow-hidden text-ellipsis text-[clamp(1.5rem,4.5vw,5rem)] font-bold text-gray-800 mb-4 md:mb-6 leading-tight mt-8"></h2>
+                    
+                    <h3 id="photo-temple" class="text-2xl md:text-4xl text-orange-700 font-medium mb-2"></h3>
+                    <h4 id="photo-province" class="text-xl md:text-3xl text-gray-500 mb-6 md:mb-8"></h4>
+                    <button onclick="togglePhotoEditMode(true)" class="bg-white hover:bg-orange-100 text-orange-700 text-lg md:text-xl font-medium py-2 px-6 rounded-full transition shadow-sm border border-orange-200 inline-flex items-center gap-2"><span>✏️</span> แก้ไขข้อมูล</button>
                 </div>
-                <div class="bg-gray-800 text-white rounded-3xl p-8 shadow-xl border-4 border-gray-600 inline-block mx-auto min-w-[300px] md:min-w-[500px]">
-                    <p class="text-2xl text-gray-300 mb-2 font-light">รหัสผ่านอินเทอร์เน็ต (WiFi)</p>
+                
+                <div class="bg-gray-800 text-white rounded-3xl p-6 md:p-8 shadow-xl border-4 border-gray-600 inline-block mx-auto min-w-[300px] md:min-w-[500px]">
+                    <p class="text-xl md:text-2xl text-gray-300 mb-2 font-light">รหัสผ่านอินเทอร์เน็ต (WiFi)</p>
                     <div class="flex flex-col items-center justify-center gap-4 mt-4">
-                        <div class="flex items-center gap-4 text-4xl md:text-5xl font-bold"><span class="text-gray-400 text-2xl font-normal w-24 text-right">User:</span><span id="photo-wifi-user" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-6 py-2 rounded-lg border border-gray-700"></span></div>
-                        <div class="flex items-center gap-4 text-4xl md:text-5xl font-bold"><span class="text-gray-400 text-2xl font-normal w-24 text-right">Pass:</span><span id="photo-wifi-pass" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-6 py-2 rounded-lg border border-gray-700"></span></div>
+                        <div class="flex items-center gap-4 text-3xl md:text-5xl font-bold"><span class="text-gray-400 text-xl md:text-2xl font-normal w-20 md:w-24 text-right">User:</span><span id="photo-wifi-user" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-4 md:px-6 py-2 rounded-lg border border-gray-700"></span></div>
+                        <div class="flex items-center gap-4 text-3xl md:text-5xl font-bold"><span class="text-gray-400 text-xl md:text-2xl font-normal w-20 md:w-24 text-right">Pass:</span><span id="photo-wifi-pass" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-4 md:px-6 py-2 rounded-lg border border-gray-700"></span></div>
                     </div>
                 </div>
-                <div><button onclick="closePhotoView()" class="bg-red-500 hover:bg-red-600 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transition transform hover:scale-105 mt-4">ปิดหน้าต่าง</button></div>
+                <div><button onclick="closePhotoView()" class="bg-red-500 hover:bg-red-600 text-white text-xl md:text-2xl font-bold py-3 md:py-4 px-10 md:px-12 rounded-full shadow-lg transition transform hover:scale-105 mt-2">ปิดหน้าต่าง</button></div>
             </div>
 
-            <div id="photo-edit-mode" class="hidden-view bg-white p-10 rounded-3xl shadow-lg border-4 border-orange-200 text-left w-full mx-auto relative">
-                <h3 class="text-3xl mb-8 font-bold text-orange-800 text-center flex items-center justify-center gap-2"><span>✏️</span> แก้ไขข้อมูล</h3>
+            <div id="photo-edit-mode" class="hidden-view bg-white p-6 md:p-10 rounded-3xl shadow-lg border-4 border-orange-200 text-left w-full mx-auto relative">
+                <h3 class="text-2xl md:text-3xl mb-6 md:mb-8 font-bold text-orange-800 text-center flex items-center justify-center gap-2"><span>✏️</span> แก้ไขข้อมูล</h3>
                 <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <div class="w-full md:w-1/4"><label class="text-gray-600 mb-2 block font-medium">คำนำหน้า</label><input type="text" id="photo-edit-prefix" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none"></div>
-                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium">ชื่อ</label><input type="text" id="photo-edit-firstname" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none"></div>
-                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium">ฉายา/นามสกุล</label><input type="text" id="photo-edit-lastname" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none"></div>
+                    <div class="w-full md:w-1/4"><label class="text-gray-600 mb-2 block font-medium">คำนำหน้า</label><input type="text" id="photo-edit-prefix" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-2xl w-full focus:border-orange-500 outline-none"></div>
+                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium">ชื่อ</label><input type="text" id="photo-edit-firstname" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-2xl w-full focus:border-orange-500 outline-none"></div>
+                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium">ฉายา/นามสกุล</label><input type="text" id="photo-edit-lastname" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-2xl w-full focus:border-orange-500 outline-none"></div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-                    <div><label class="text-gray-600 mb-2 block font-medium">วัด</label><input type="text" id="photo-edit-temple" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none"></div>
-                    <div><label class="text-gray-600 mb-2 block font-medium">จังหวัด</label><input type="text" id="photo-edit-province" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 md:mb-10">
+                    <div><label class="text-gray-600 mb-2 block font-medium">วัด</label><input type="text" id="photo-edit-temple" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-2xl w-full focus:border-orange-500 outline-none"></div>
+                    <div><label class="text-gray-600 mb-2 block font-medium">จังหวัด</label><input type="text" id="photo-edit-province" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-2xl w-full focus:border-orange-500 outline-none"></div>
                 </div>
-                <div class="flex justify-center gap-4 mt-4">
-                    <button onclick="savePhotoProfile()" class="bg-green-600 hover:bg-green-700 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transition">💾 บันทึกข้อมูล</button>
-                    <button onclick="togglePhotoEditMode(false)" class="bg-gray-400 hover:bg-gray-500 text-white text-2xl font-medium py-4 px-10 rounded-full shadow-md transition">ยกเลิก</button>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
+                    <button onclick="savePhotoProfile()" class="bg-green-600 hover:bg-green-700 text-white text-xl md:text-2xl font-bold py-3 md:py-4 px-10 md:px-12 rounded-full shadow-lg transition">💾 บันทึกข้อมูล</button>
+                    <button onclick="togglePhotoEditMode(false)" class="bg-gray-400 hover:bg-gray-500 text-white text-xl md:text-2xl font-medium py-3 md:py-4 px-8 md:px-10 rounded-full shadow-md transition">ยกเลิก</button>
                 </div>
             </div>
         </div>
