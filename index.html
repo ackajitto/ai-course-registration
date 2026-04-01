@@ -13,13 +13,27 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Chosen Palette: Warm Saffron/Amber tones -->
+    <!-- Application Structure Plan: 
+         - Modular navigation using simple JS state.
+         - Robust table with search and sort by Vassa.
+         - Walk-in registration with auto-incrementing ID.
+         - Profile view and Photo/WiFi view with 2-space name spacing.
+         - Export functionality for budget reporting.
+    -->
+    <!-- Visualization & Content Choices: 
+         - Donut chart for daily attendance ratio.
+         - Responsive Tailwind grid for dashboard cards.
+         - Clean white-space and professional typography.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
     <style>
         body {
             font-family: 'Kanit', sans-serif;
             background-color: #fefce8; /* amber-50 */
         }
         
-        /* Chart Container Styling */
         .chart-container {
             position: relative;
             width: 100%;
@@ -38,7 +52,12 @@
             width: 1.5rem;
             height: 1.5rem;
             cursor: pointer;
-            accent-color: #f97316; /* orange-500 */
+            accent-color: #f97316;
+        }
+
+        /* Ensure double spaces are rendered in HTML */
+        .name-display {
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -50,7 +69,6 @@
             <span>📝</span> ระบบลงทะเบียน
         </div>
         <div class="flex gap-2 md:gap-4 flex-wrap justify-end">
-            <!-- ปุ่มลงทะเบียนเพิ่มเติม (เปลี่ยนข้อความแล้ว) -->
             <button onclick="openWalkInModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:px-4 md:py-2 rounded transition font-medium text-sm md:text-base whitespace-nowrap shadow-md border border-blue-500">
                 + เพิ่มรายชื่อ
             </button>
@@ -68,13 +86,13 @@
         <section id="view-registration" class="max-w-6xl mx-auto">
             <div class="mb-6 md:mb-8">
                 <h1 class="text-2xl md:text-3xl font-bold text-orange-800 mb-3">ค้นหาและลงทะเบียนผู้เข้าร่วมงาน</h1>
-                <p class="text-gray-600 text-base md:text-lg leading-relaxed">พิมพ์รหัสประจำตัว ชื่อ หรือเบอร์โทรศัพท์ ในช่องด้านล่างเพื่อค้นหา จากนั้นกดติ๊กถูกในช่องวันที่มาเพื่อยืนยัน <br class="hidden md:block"><span class="text-sm md:text-base text-gray-500 md:mt-1 inline-block">(สามารถกดที่แถบรายชื่อเพื่อดูข้อมูลแบบเต็มหน้าจอได้)</span></p>
+                <p class="text-gray-600 text-base md:text-lg leading-relaxed">พิมพ์รหัสประจำตัว ชื่อ จังหวัด หรือเบอร์โทรศัพท์ เพื่อค้นหา <br class="hidden md:block"><span class="text-sm md:text-base text-gray-500 md:mt-1 inline-block">(สามารถกดที่แถบรายชื่อเพื่อดูข้อมูลแบบเต็มหน้าจอได้)</span></p>
             </div>
 
             <!-- Search Box -->
             <div class="bg-white p-4 rounded-lg shadow-sm border border-orange-100 mb-6 flex items-center gap-3">
-                <span class="text-2xl">🔍</span>
-                <input type="text" id="searchInput" placeholder="ค้นหา รหัสประจำตัว, ชื่อ, เบอร์โทร..." 
+                <span class="text-2xl font-canvas">🔍</span>
+                <input type="text" id="searchInput" placeholder="ค้นหา รหัส, ชื่อ, วัด, จังหวัด, เบอร์โทร..." 
                        class="w-full text-lg p-2 outline-none focus:border-b-2 focus:border-orange-500 transition-colors"
                        onkeyup="handleSearch()">
             </div>
@@ -82,32 +100,29 @@
             <!-- Data Table -->
             <div class="bg-white rounded-lg shadow-sm border border-orange-100 overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-orange-50">
+                    <thead class="bg-orange-50 text-orange-800">
                         <tr>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-orange-800 uppercase tracking-wider">ลำดับ</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-orange-800 uppercase tracking-wider">รหัสประจำตัว</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-orange-800 uppercase tracking-wider whitespace-nowrap">ฉายา/ชื่อ-สกุล</th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold text-orange-800 uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSortVassa()" title="คลิกเพื่อเรียงตามพรรษา">
-                                พรรษา
-                                <span id="sort-vassa-icon" class="ml-1 text-orange-500 text-base">🔽</span>
+                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">ลำดับ</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">รหัสประจำตัว</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider whitespace-nowrap">ฉายา/ชื่อ-สกุล</th>
+                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSortVassa()" title="คลิกเพื่อเรียงตามพรรษา">
+                                พรรษา <span id="sort-vassa-icon" class="ml-1 text-orange-500 text-base">🔽</span>
                             </th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold text-orange-800 uppercase tracking-wider">เบอร์โทรศัพท์</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-orange-800 uppercase tracking-wider">สังกัดวัด</th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold text-orange-800 uppercase tracking-wider">มาวันที่ 1</th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold text-orange-800 uppercase tracking-wider">มาวันที่ 2</th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold text-orange-800 uppercase tracking-wider">รหัส WiFi</th>
+                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">เบอร์โทรศัพท์</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">สังกัดวัด</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">จังหวัด</th>
+                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">มาวันที่ 1</th>
+                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">มาวันที่ 2</th>
+                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">รหัส WiFi</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
-                        <!-- Rows will be populated by JS -->
+                        <!-- Rows populated by JS -->
                     </tbody>
                 </table>
-                <div id="noResultsMsg" class="hidden text-center py-8 text-gray-500">
-                    ไม่พบข้อมูลที่ค้นหา
-                </div>
+                <div id="noResultsMsg" class="hidden text-center py-8 text-gray-500">ไม่พบข้อมูลที่ค้นหา</div>
             </div>
         </section>
-
 
         <!-- ========================================== -->
         <!-- VIEW 2: DASHBOARD & SUMMARY -->
@@ -116,7 +131,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
                     <h1 class="text-2xl md:text-3xl font-bold text-orange-800 mb-2">สรุปผลการลงทะเบียน</h1>
-                    <p class="text-gray-600">ข้อมูลสำหรับตรวจสอบและดาวน์โหลดเพื่อนำไปเบิกงบประมาณ</p>
+                    <p class="text-gray-600">สถิติและข้อมูลผู้เข้าร่วมเพื่อการทำรายงาน</p>
                 </div>
                 <button onclick="exportCSV()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-md font-medium text-lg flex items-center gap-2 transition">
                     <span>📥</span> ดึงข้อมูล (CSV / Excel)
@@ -126,253 +141,156 @@
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white rounded-xl shadow border-l-4 border-blue-500 p-6">
-                    <p class="text-gray-500 text-sm font-semibold mb-1">ยอดผู้ลงทะเบียนทั้งหมด (มี WiFi)</p>
+                    <p class="text-gray-500 text-sm font-semibold mb-1">ยอดรวมผู้ลงทะเบียน</p>
                     <p class="text-3xl font-bold text-gray-800" id="stat-total">0</p>
                 </div>
                 <div class="bg-white rounded-xl shadow border-l-4 border-orange-500 p-6">
-                    <p class="text-gray-500 text-sm font-semibold mb-1">เข้าร่วม วันที่ 1</p>
+                    <p class="text-gray-500 text-sm font-semibold mb-1">มาวันที่ 1</p>
                     <p class="text-3xl font-bold text-gray-800" id="stat-day1">0</p>
                 </div>
                 <div class="bg-white rounded-xl shadow border-l-4 border-green-500 p-6">
-                    <p class="text-gray-500 text-sm font-semibold mb-1">เข้าร่วม วันที่ 2</p>
+                    <p class="text-gray-500 text-sm font-semibold mb-1">มาวันที่ 2</p>
                     <p class="text-3xl font-bold text-gray-800" id="stat-day2">0</p>
                 </div>
             </div>
 
-            <!-- Chart Section -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4 text-center">สัดส่วนการเข้าร่วมแต่ละวัน</h3>
-                <div class="chart-container">
-                    <canvas id="attendanceChart"></canvas>
-                </div>
+                <div class="chart-container"><canvas id="attendanceChart"></canvas></div>
             </div>
             
-            <!-- Simple Summary Table -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">รายชื่อผู้ที่มาร่วมงาน (ลงทะเบียนแล้ว)</h3>
-                <div class="overflow-x-auto h-64 overflow-y-auto">
-                    <table class="min-w-full text-sm">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">รายชื่อผู้เข้าร่วม</h3>
+                <div class="overflow-x-auto h-64 overflow-y-auto text-sm">
+                    <table class="min-w-full">
                         <thead class="bg-gray-50 sticky top-0">
                             <tr>
                                 <th class="p-2 text-left">รหัสประจำตัว</th>
                                 <th class="p-2 text-left">ชื่อ-สกุล</th>
+                                <th class="p-2 text-left">จังหวัด</th>
                                 <th class="p-2 text-center">วัน 1</th>
                                 <th class="p-2 text-center">วัน 2</th>
                                 <th class="p-2 text-center">WiFi</th>
                             </tr>
                         </thead>
-                        <tbody id="summaryTableBody" class="divide-y divide-gray-100">
-                            <!-- Populated by JS -->
-                        </tbody>
+                        <tbody id="summaryTableBody" class="divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
             </div>
-
         </section>
-
     </main>
 
     <!-- ========================================== -->
-    <!-- OVERLAY 0: WALK-IN REGISTRATION (เพิ่มรายชื่อใหม่) -->
+    <!-- OVERLAY 0: WALK-IN (เพิ่มรายชื่อ) -->
     <!-- ========================================== -->
-    <div id="walkin-overlay" class="fixed inset-0 bg-black/50 z-50 hidden-view flex flex-col justify-center items-center p-4 md:p-8 overflow-y-auto">
+    <div id="walkin-overlay" class="fixed inset-0 bg-black/50 z-50 hidden-view flex flex-col justify-center items-center p-4 overflow-y-auto">
         <div class="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl w-full max-w-3xl relative border-t-8 border-blue-500">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                <span>➕</span> เพิ่มรายชื่อผู้เข้าร่วมงาน
-            </h2>
-            <p class="text-gray-500 mb-8">กรุณากรอกข้อมูลเพื่อเพิ่มรายชื่อลงในระบบ</p>
-
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">➕ เพิ่มรายชื่อผู้เข้าร่วมงาน</h2>
             <div class="flex flex-col gap-5">
-                <!-- รหัสประจำตัว -->
                 <div>
-                    <label class="text-gray-600 mb-1 block font-medium">รหัสประจำตัว <span class="text-gray-400 text-sm">(รันอัตโนมัติจากล่าสุด หรือแก้ไขได้)</span></label>
+                    <label class="text-gray-600 mb-1 block font-medium">รหัสประจำตัว (รันให้อัตโนมัติ)</label>
                     <input type="text" id="walkin-regId" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none bg-blue-50 font-bold text-blue-800">
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div class="md:col-span-1">
+                    <div>
                         <label class="text-gray-600 mb-1 block font-medium">คำนำหน้า/ฉายา</label>
-                        <input type="text" id="walkin-prefix" placeholder="เช่น พระมหา, นาย" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                        <input type="text" id="walkin-prefix" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
                     </div>
-                    <div class="md:col-span-1">
+                    <div>
                         <label class="text-gray-600 mb-1 block font-medium">ชื่อ <span class="text-red-500">*</span></label>
                         <input type="text" id="walkin-firstname" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
                     </div>
-                    <div class="md:col-span-1">
+                    <div>
                         <label class="text-gray-600 mb-1 block font-medium">นามสกุล</label>
                         <input type="text" id="walkin-lastname" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
                     </div>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label class="text-gray-600 mb-1 block font-medium">อายุพรรษา <span class="text-gray-400 text-sm">(ปล่อยว่างได้หากเป็นฆราวาส)</span></label>
-                        <input type="number" id="walkin-vassa" placeholder="ระบุตัวเลข" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                        <label class="text-gray-600 mb-1 block font-medium">อายุพรรษา (เว้นได้หากเป็นฆราวาส)</label>
+                        <input type="number" id="walkin-vassa" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
                     </div>
                     <div>
                         <label class="text-gray-600 mb-1 block font-medium">เบอร์โทรศัพท์</label>
-                        <input type="text" id="walkin-phone" placeholder="เช่น 0812345678" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                        <input type="text" id="walkin-phone" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
                     </div>
                 </div>
-
-                <div>
-                    <label class="text-gray-600 mb-1 block font-medium">สังกัดวัด / หน่วยงาน <span class="text-red-500">*</span></label>
-                    <input type="text" id="walkin-temple" placeholder="เช่น วัดอรุณราชวราราม" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div><label class="text-gray-600 mb-1 block font-medium">สังกัดวัด / หน่วยงาน <span class="text-red-500">*</span></label><input type="text" id="walkin-temple" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none"></div>
+                    <div><label class="text-gray-600 mb-1 block font-medium">จังหวัด <span class="text-red-500">*</span></label><input type="text" id="walkin-province" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none"></div>
                 </div>
             </div>
-
             <div class="flex justify-end gap-4 mt-10">
-                <button onclick="closeWalkInModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xl font-medium py-3 px-8 rounded-full transition">
-                    ยกเลิก
-                </button>
-                <button onclick="saveWalkIn()" class="bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold py-3 px-10 rounded-full shadow-md transition transform hover:-translate-y-1">
-                    💾 บันทึกรายชื่อ
-                </button>
+                <button onclick="closeWalkInModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xl font-medium py-3 px-8 rounded-full transition">ยกเลิก</button>
+                <button onclick="saveWalkIn()" class="bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold py-3 px-10 rounded-full shadow-md transition transform hover:-translate-y-1">💾 บันทึกรายชื่อ</button>
             </div>
         </div>
     </div>
 
-
     <!-- ========================================== -->
-    <!-- OVERLAY 1: PROFILE DETAILS VIEW (คลิกดูรายชื่อเฉยๆ) -->
+    <!-- OVERLAY 1: PROFILE DETAILS -->
     <!-- ========================================== -->
     <div id="profile-overlay" class="fixed inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 z-50 hidden-view flex flex-col justify-center items-center p-8 overflow-y-auto">
-        
         <div class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-[3rem] shadow-2xl border-8 border-orange-200 p-12 md:p-20 relative text-center">
-            
-            <!-- Close Button -->
-            <button onclick="closeProfileView()" class="absolute top-8 right-8 bg-gray-200 hover:bg-red-100 hover:text-red-600 text-gray-600 rounded-full w-16 h-16 flex items-center justify-center text-3xl transition-colors duration-300 shadow-sm">
-                ✕
-            </button>
-            
-            <!-- รหัสประจำตัว (Registration ID) -->
+            <button onclick="closeProfileView()" class="absolute top-8 right-8 bg-gray-200 hover:bg-red-100 hover:text-red-600 text-gray-600 rounded-full w-16 h-16 flex items-center justify-center text-3xl transition-colors duration-300 shadow-sm">✕</button>
             <div class="bg-orange-100 inline-block px-10 py-3 rounded-2xl border-2 border-orange-300 mb-10 mt-4 shadow-inner">
-                <span class="text-3xl text-orange-800 mr-3">รหัสประจำตัว:</span>
-                <span id="profile-reg-id" class="text-5xl md:text-6xl font-bold text-orange-600 tracking-widest drop-shadow-sm">
-                    <!-- Reg ID จะมาโชว์ที่นี่ -->
-                </span>
+                <span class="text-3xl text-orange-800 mr-3 font-normal">รหัสประจำตัว:</span>
+                <span id="profile-reg-id" class="text-5xl md:text-6xl font-bold text-orange-600 tracking-widest"></span>
             </div>
-
-            <!-- ชื่อ-นามสกุล -->
-            <h1 id="profile-name" class="text-6xl md:text-7xl font-bold text-gray-800 mb-8 leading-tight drop-shadow-sm text-transparent bg-clip-text bg-gradient-to-r from-orange-800 to-yellow-800">
-                <!-- Name -->
-            </h1>
-
+            <h1 id="profile-name" class="name-display text-6xl md:text-8xl font-bold text-gray-800 mb-8 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-800 to-yellow-800"></h1>
             <div class="w-32 h-2 bg-orange-300 mx-auto rounded-full mb-8"></div>
-
-            <!-- ชื่อวัด (ไม่มีคำว่า วัด: นำหน้า) -->
-            <h3 id="profile-temple" class="text-4xl md:text-5xl text-orange-700 font-medium mb-4">
-                <!-- Temple -->
-            </h3>
-
+            <h3 id="profile-temple" class="text-4xl md:text-5xl text-orange-700 font-medium mb-4"></h3>
+            <h4 id="profile-province" class="text-3xl md:text-4xl text-gray-600 font-normal"></h4>
         </div>
     </div>
 
-
     <!-- ========================================== -->
-    <!-- OVERLAY 2: PHOTO VIEW (หลังกดติ๊กยืนยันการมา) -->
+    <!-- OVERLAY 2: PHOTO & WiFi VIEW -->
     <!-- ========================================== -->
     <div id="photo-overlay" class="fixed inset-0 bg-white z-50 flex flex-col justify-center items-center hidden-view p-8 overflow-y-auto">
-        
         <div class="w-full max-w-4xl text-center flex flex-col gap-10">
-            <!-- Header Status -->
-            <div class="text-green-600 text-3xl font-bold mb-4 flex items-center justify-center gap-2">
-                <span>✅</span> ยืนยันการลงทะเบียนสำเร็จ
-            </div>
-
-            <!-- โหมดแสดงผลปกติ (PHOTO VIEW MODE) -->
+            <div class="text-green-600 text-3xl font-bold mb-4 flex items-center justify-center gap-2"><span>✅</span> ยืนยันการลงทะเบียนสำเร็จ</div>
             <div id="photo-view-mode" class="flex flex-col gap-10">
-                <!-- Profile Info -->
                 <div class="bg-orange-50 border-4 border-orange-200 rounded-3xl p-10 shadow-lg relative mt-6">
-                    
-                    <!-- รหัสประจำตัว บนหน้าถ่ายรูป -->
                     <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-orange-600 text-white px-10 py-3 rounded-full shadow-md border-4 border-white tracking-wider flex items-center gap-3 w-max">
                         <span class="text-xl font-normal text-orange-200">รหัสประจำตัว:</span>
-                        <span id="photo-reg-id" class="font-bold text-4xl text-white">
-                            <!-- Reg ID populates here -->
-                        </span>
+                        <span id="photo-reg-id" class="font-bold text-4xl text-white"></span>
                     </div>
-
-                    <h2 id="photo-name" class="text-5xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight mt-8">
-                        <!-- Name populates here -->
-                    </h2>
-                    <h3 id="photo-temple" class="text-3xl md:text-4xl text-orange-700 font-medium mb-8">
-                        <!-- Temple populates here -->
-                    </h3>
-
-                    <!-- ปุ่มแก้ไขข้อมูล ย้ายมาไว้หน้านี้ -->
-                    <button onclick="togglePhotoEditMode(true)" class="bg-white hover:bg-orange-100 text-orange-700 text-xl font-medium py-2 px-6 rounded-full transition shadow-sm border border-orange-200 inline-flex items-center gap-2">
-                        <span>✏️</span> แก้ไขข้อมูล
-                    </button>
+                    <h2 id="photo-name" class="name-display text-5xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight mt-8"></h2>
+                    <h3 id="photo-temple" class="text-3xl md:text-4xl text-orange-700 font-medium mb-2"></h3>
+                    <h4 id="photo-province" class="text-2xl md:text-3xl text-gray-500 mb-8"></h4>
+                    <button onclick="togglePhotoEditMode(true)" class="bg-white hover:bg-orange-100 text-orange-700 text-xl font-medium py-2 px-6 rounded-full transition shadow-sm border border-orange-200 inline-flex items-center gap-2"><span>✏️</span> แก้ไขข้อมูล</button>
                 </div>
-
-                <!-- WiFi Info -->
                 <div class="bg-gray-800 text-white rounded-3xl p-8 shadow-xl border-4 border-gray-600 inline-block mx-auto min-w-[300px] md:min-w-[500px]">
                     <p class="text-2xl text-gray-300 mb-2 font-light">รหัสผ่านอินเทอร์เน็ต (WiFi)</p>
                     <div class="flex flex-col items-center justify-center gap-4 mt-4">
-                        <div class="flex items-center gap-4 text-4xl md:text-5xl font-bold">
-                            <span class="text-gray-400 text-2xl font-normal w-24 text-right">User:</span>
-                            <span id="photo-wifi-user" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-6 py-2 rounded-lg border border-gray-700"></span>
-                        </div>
-                        <div class="flex items-center gap-4 text-4xl md:text-5xl font-bold">
-                            <span class="text-gray-400 text-2xl font-normal w-24 text-right">Pass:</span>
-                            <span id="photo-wifi-pass" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-6 py-2 rounded-lg border border-gray-700"></span>
-                        </div>
+                        <div class="flex items-center gap-4 text-4xl md:text-5xl font-bold"><span class="text-gray-400 text-2xl font-normal w-24 text-right">User:</span><span id="photo-wifi-user" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-6 py-2 rounded-lg border border-gray-700"></span></div>
+                        <div class="flex items-center gap-4 text-4xl md:text-5xl font-bold"><span class="text-gray-400 text-2xl font-normal w-24 text-right">Pass:</span><span id="photo-wifi-pass" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-6 py-2 rounded-lg border border-gray-700"></span></div>
                     </div>
                 </div>
-
-                <!-- Action -->
-                <div>
-                    <button onclick="closePhotoView()" class="bg-red-500 hover:bg-red-600 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transition transform hover:scale-105 mt-4">
-                        ปิดหน้าต่าง
-                    </button>
-                </div>
+                <div><button onclick="closePhotoView()" class="bg-red-500 hover:bg-red-600 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transition transform hover:scale-105 mt-4">ปิดหน้าต่าง</button></div>
             </div>
 
-            <!-- โหมดแก้ไขข้อมูล (PHOTO EDIT MODE) -->
             <div id="photo-edit-mode" class="hidden-view bg-white p-10 rounded-3xl shadow-lg border-4 border-orange-200 text-left w-full mx-auto relative">
-                <h3 class="text-3xl mb-8 font-bold text-orange-800 text-center flex items-center justify-center gap-2">
-                    <span>✏️</span> แก้ไขข้อมูลผู้ลงทะเบียน
-                </h3>
-                
+                <h3 class="text-3xl mb-8 font-bold text-orange-800 text-center flex items-center justify-center gap-2"><span>✏️</span> แก้ไขข้อมูล</h3>
                 <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <div class="w-full md:w-1/4">
-                        <label class="text-gray-600 mb-2 block font-medium">คำนำหน้า</label>
-                        <input type="text" id="photo-edit-prefix" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none">
-                    </div>
-                    <div class="w-full md:w-2/4">
-                        <label class="text-gray-600 mb-2 block font-medium">ชื่อ</label>
-                        <input type="text" id="photo-edit-firstname" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none">
-                    </div>
-                    <div class="w-full md:w-2/4">
-                        <label class="text-gray-600 mb-2 block font-medium">ฉายา/นามสกุล</label>
-                        <input type="text" id="photo-edit-lastname" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none">
-                    </div>
+                    <div class="w-full md:w-1/4"><label class="text-gray-600 mb-2 block font-medium">คำนำหน้า</label><input type="text" id="photo-edit-prefix" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none"></div>
+                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium">ชื่อ</label><input type="text" id="photo-edit-firstname" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none"></div>
+                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium">ฉายา/นามสกุล</label><input type="text" id="photo-edit-lastname" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none"></div>
                 </div>
-                <div class="mb-10 w-full">
-                    <label class="text-gray-600 mb-2 block font-medium">สังกัดวัด</label>
-                    <input type="text" id="photo-edit-temple" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+                    <div><label class="text-gray-600 mb-2 block font-medium">วัด</label><input type="text" id="photo-edit-temple" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none"></div>
+                    <div><label class="text-gray-600 mb-2 block font-medium">จังหวัด</label><input type="text" id="photo-edit-province" class="border-2 border-orange-200 rounded-xl p-4 text-2xl w-full focus:border-orange-500 outline-none"></div>
                 </div>
-                
                 <div class="flex justify-center gap-4 mt-4">
-                    <button onclick="savePhotoProfile()" class="bg-green-600 hover:bg-green-700 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transition transform hover:-translate-y-1">
-                        💾 บันทึกข้อมูล
-                    </button>
-                    <button onclick="togglePhotoEditMode(false)" class="bg-gray-400 hover:bg-gray-500 text-white text-2xl font-medium py-4 px-10 rounded-full shadow-md transition">
-                        ยกเลิก
-                    </button>
+                    <button onclick="savePhotoProfile()" class="bg-green-600 hover:bg-green-700 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transition">💾 บันทึกข้อมูล</button>
+                    <button onclick="togglePhotoEditMode(false)" class="bg-gray-400 hover:bg-gray-500 text-white text-2xl font-medium py-4 px-10 rounded-full shadow-md transition">ยกเลิก</button>
                 </div>
             </div>
-
         </div>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- JAVASCRIPT LOGIC -->
-    <!-- ========================================== -->
     <script>
-        
         let currentWifiCounter = 1; 
         let chartInstance = null;
         let currentPhotoPersonId = null; 
@@ -381,483 +299,246 @@
         const firstNames = ["กิตติ", "วิชาญ", "ประเสริฐ", "สมศักดิ์", "วิชัย", "สมชาย", "มานพ", "อำนวย", "สุชาติ", "สมเกียรติ", "ณรงค์", "ธวัชชัย", "สมบูรณ์", "พรชัย", "เจริญ"];
         const lastNames = ["รักสงบ", "สิริจนฺโท", "ธมฺมทินฺโน", "ชุติมนฺโต", "ฐิตธมฺโม", "เตชวโร", "สุสิริ", "ปสาทิโก", "โชติโก", "สุปญฺโญ", "ใจดี", "มีสุข", "บุญมาก", "ปญฺญาคโม"];
         const temples = ["วัดระฆัง", "วัดอรุณราชวราราม", "วัดพระเชตุพน", "วัดสระเกศ", "วัดบวรนิเวศ", "วัดเบญจมบพิตร", "วัดสุทัศน์", "วัดมหาธาตุ", "วัดปากน้ำ", "วัดไตรมิตร"];
+        const provs = ["กรุงเทพฯ", "อยุธยา", "ปทุมธานี", "นครปฐม", "นนทบุรี", "สมุทรปราการ", "ชลบุรี", "เชียงใหม่", "ขอนแก่น", "สงขลา"];
         
-        // แยกคำนำหน้าพระ และ ฆราวาส
         const monkPrefixes = ["พระมหา", "พระครู", "พระอธิการ", "พระสมุห์", "พระใบฎีกา", "พระ"];
         const layPrefixes = ["นาย", "นาง", "นางสาว", "ดร.", "ผศ."];
         const allPrefixes = [...monkPrefixes, ...layPrefixes];
 
         let attendees = [];
-        
-        // Generate mock records
         for (let i = 1; i <= 50; i++) {
             let regIdNum = i.toString().padStart(3, '0');
-            let selectedPrefix = allPrefixes[Math.floor(Math.random() * allPrefixes.length)];
-            let isMonk = monkPrefixes.includes(selectedPrefix);
-
+            let pref = allPrefixes[Math.floor(Math.random() * allPrefixes.length)];
+            let isMonk = monkPrefixes.includes(pref);
             attendees.push({
-                id: i,
-                regId: `DCI02${regIdNum}`, 
+                id: i, regId: `DCI02${regIdNum}`, 
                 vassa: isMonk ? Math.floor(Math.random() * 30) + 1 : null,
                 phone: `08${Math.floor(Math.random() * 10000000).toString().padStart(8, '0')}`,
-                prefix: selectedPrefix,
+                prefix: pref,
                 firstName: firstNames[Math.floor(Math.random() * firstNames.length)],
                 lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
                 temple: temples[Math.floor(Math.random() * temples.length)],
-                day1: false, 
-                day2: false, 
-                wifi: null,
-                isNew: false // Flag เช็คว่าเพิ่งแอดใหม่ไหม
+                province: provs[Math.floor(Math.random() * provs.length)],
+                day1: false, day2: false, wifi: null, isNew: false
             });
         }
 
-        // --- Core Functions ---
-
-        function init() {
-            renderTable(attendees);
-        }
+        function init() { renderTable(attendees); }
 
         function toggleSortVassa() {
             isSortedByVassaDesc = !isSortedByVassaDesc;
             const icon = document.getElementById('sort-vassa-icon');
-            
             if (isSortedByVassaDesc) {
-                // เรียงตามพรรษา มาก -> น้อย (ฆราวาสเป็น null จะถูกปัดไปอยู่ท้ายสุด)
-                attendees.sort((a, b) => {
-                    let vA = a.vassa || 0;
-                    let vB = b.vassa || 0;
-                    return vB - vA;
-                });
+                attendees.sort((a, b) => (b.vassa || 0) - (a.vassa || 0));
                 icon.innerText = '🔼';
-                icon.title = 'เรียงกลับตามลำดับเดิม';
             } else {
-                // เรียงกลับตามลำดับเดิม (อิงจาก ID)
-                attendees.sort((a, b) => b.id - a.id); // ให้คนเพิ่งแอดใหม่อยู่บนสุดเสมอ
+                attendees.sort((a, b) => b.id - a.id);
                 icon.innerText = '🔽';
-                icon.title = 'เรียงตามพรรษา (มากไปน้อย)';
             }
-            
             handleSearch();
         }
 
-        function switchView(viewName) {
-            const regView = document.getElementById('view-registration');
-            const dashView = document.getElementById('view-dashboard');
-            const btnReg = document.getElementById('nav-reg');
-            const btnDash = document.getElementById('nav-dash');
-
-            if (viewName === 'registration') {
-                regView.classList.remove('hidden-view');
-                dashView.classList.add('hidden-view');
-                btnReg.classList.replace('hover:bg-orange-500', 'bg-orange-700');
-                btnDash.classList.replace('bg-orange-700', 'hover:bg-orange-500');
-                handleSearch();
-            } else if (viewName === 'dashboard') {
-                regView.classList.add('hidden-view');
-                dashView.classList.remove('hidden-view');
-                btnDash.classList.replace('hover:bg-orange-500', 'bg-orange-700');
-                btnReg.classList.replace('bg-orange-700', 'hover:bg-orange-500');
-                updateDashboard();
-            }
+        function switchView(name) {
+            document.getElementById('view-registration').classList.toggle('hidden-view', name !== 'registration');
+            document.getElementById('view-dashboard').classList.toggle('hidden-view', name !== 'dashboard');
+            document.getElementById('nav-reg').className = name === 'registration' ? 'bg-orange-700 text-white px-4 py-2 rounded transition font-medium' : 'hover:bg-orange-500 px-4 py-2 rounded transition font-medium';
+            document.getElementById('nav-dash').className = name === 'dashboard' ? 'bg-orange-700 text-white px-4 py-2 rounded transition font-medium' : 'hover:bg-orange-500 px-4 py-2 rounded transition font-medium';
+            if (name === 'dashboard') updateDashboard();
         }
 
-        // Render main registration table
-        function renderTable(dataList) {
+        // Helper to construct name with 2-space gap
+        function getFullName(p) {
+            // Note: Template literal with 2 spaces for visual and CSV consistency
+            return `${p.prefix} ${p.firstName}  ${p.lastName}`;
+        }
+
+        function renderTable(list) {
             const tbody = document.getElementById('tableBody');
-            const noResults = document.getElementById('noResultsMsg');
+            const noRes = document.getElementById('noResultsMsg');
             tbody.innerHTML = '';
-
-            if (dataList.length === 0) {
-                noResults.classList.remove('hidden');
-            } else {
-                noResults.classList.add('hidden');
-                dataList.forEach((person, index) => {
-                    const row = document.createElement('tr');
-                    
-                    row.className = "hover:bg-orange-50 transition-colors cursor-pointer";
-                    // ไฮไลต์รายชื่อที่เพิ่งลงทะเบียนเพิ่ม (ให้เป็นสีฟ้าอ่อนๆ)
-                    if (person.isNew) {
-                        row.classList.add("bg-blue-50");
-                    }
-
-                    row.onclick = () => openProfileView(person.id);
-                    
-                    const fullName = `${person.prefix} ${person.firstName} ${person.lastName}`;
-                    const wifiDisplay = person.wifi ? `<span class="bg-gray-800 text-yellow-400 font-mono px-2 py-1 rounded text-sm">${person.wifi}</span>` : `<span class="text-gray-400">-</span>`;
-                    
-                    const vassaText = person.vassa ? person.vassa : '-';
-
-                    // แสดงลำดับ อิงจาก index ที่ถูกส่งเข้ามาจากการค้นหาหรือการจัดเรียง
-                    row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-orange-700">${person.regId}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${fullName}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600 font-semibold">${vassaText}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">${person.phone}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${person.temple}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <input type="checkbox" class="large-checkbox" 
-                                ${person.day1 ? 'checked' : ''} 
-                                onclick="event.stopPropagation();"
-                                onchange="handleRegistration(${person.id}, 1, this.checked)">
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <input type="checkbox" class="large-checkbox" 
-                                ${person.day2 ? 'checked' : ''} 
-                                onclick="event.stopPropagation();"
-                                onchange="handleRegistration(${person.id}, 2, this.checked)">
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center" id="wifi-cell-${person.id}">
-                            ${wifiDisplay}
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            }
-        }
-
-        // Handle Search filtering
-        function handleSearch() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filteredData = attendees.filter(p => {
-                const fullName = `${p.prefix} ${p.firstName} ${p.lastName}`.toLowerCase();
-                const temple = p.temple.toLowerCase();
-                const regId = p.regId.toLowerCase();
-                const phone = p.phone;
-                return fullName.includes(query) || temple.includes(query) || regId.includes(query) || phone.includes(query);
+            if (list.length === 0) { noRes.classList.remove('hidden'); return; }
+            noRes.classList.add('hidden');
+            list.forEach((p, idx) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-orange-50 transition-colors cursor-pointer " + (p.isNew ? "bg-blue-50" : "");
+                row.onclick = () => openProfileView(p.id);
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${idx + 1}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-orange-700">${p.regId}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 name-display">${getFullName(p)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600 font-semibold">${p.vassa || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">${p.phone}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.temple}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.province}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day1 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration(${p.id}, 1, this.checked)"></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day2 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration(${p.id}, 2, this.checked)"></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center" id="wifi-cell-${p.id}">${p.wifi ? `<span class="bg-gray-800 text-yellow-400 font-mono px-2 py-1 rounded text-sm">${p.wifi}</span>` : `<span class="text-gray-400">-</span>`}</td>
+                `;
+                tbody.appendChild(row);
             });
-            renderTable(filteredData);
         }
 
-        // ==========================================
-        // WALK-IN REGISTRATION LOGIC
-        // ==========================================
+        function handleSearch() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = attendees.filter(p => 
+                getFullName(p).toLowerCase().includes(q) ||
+                p.temple.toLowerCase().includes(q) ||
+                p.province.toLowerCase().includes(q) ||
+                p.regId.toLowerCase().includes(q) ||
+                p.phone.includes(q)
+            );
+            renderTable(filtered);
+        }
+
         function openWalkInModal() {
-            // เคลียร์ค่าในฟอร์ม
             document.getElementById('walkin-prefix').value = '';
             document.getElementById('walkin-firstname').value = '';
             document.getElementById('walkin-lastname').value = '';
             document.getElementById('walkin-vassa').value = '';
             document.getElementById('walkin-phone').value = '';
             document.getElementById('walkin-temple').value = '';
+            document.getElementById('walkin-province').value = '';
             
-            // หาเลขรหัสประจำตัวที่มากที่สุดในระบบตอนนี้เพื่อรันเลขต่อไป
-            let maxNum = 0;
-            let currentPrefix = "DCI02"; // ค่าเริ่มต้น
-            
+            let maxN = 0;
+            let pref = "DCI02";
             attendees.forEach(p => {
-                // ค้นหาตัวเลขต่อท้ายรหัส (เช่น DCI02050 -> เอา 050 มาเช็ค)
-                const match = p.regId.match(/^(.*?)(\d+)$/);
-                if (match) {
-                    const num = parseInt(match[2], 10);
-                    if (num > maxNum) {
-                        maxNum = num;
-                        currentPrefix = match[1]; // จำตัวหนังสือด้านหน้าไว้ (เช่น DCI02)
-                    }
-                }
+                const m = p.regId.match(/^(.*?)(\d+)$/);
+                if (m) { const n = parseInt(m[2], 10); if (n > maxN) { maxN = n; pref = m[1]; } }
             });
-
-            // สร้างรหัสใหม่ต่อจากอันล่าสุด
-            let nextNumStr = (maxNum + 1).toString().padStart(3, '0');
-            document.getElementById('walkin-regId').value = `${currentPrefix}${nextNumStr}`;
-
+            document.getElementById('walkin-regId').value = `${pref}${(maxN + 1).toString().padStart(3, '0')}`;
             document.getElementById('walkin-overlay').classList.remove('hidden-view');
         }
 
-        function closeWalkInModal() {
-            document.getElementById('walkin-overlay').classList.add('hidden-view');
-        }
-
         function saveWalkIn() {
-            const regId = document.getElementById('walkin-regId').value.trim();
-            const prefix = document.getElementById('walkin-prefix').value.trim();
-            const firstName = document.getElementById('walkin-firstname').value.trim();
-            const lastName = document.getElementById('walkin-lastname').value.trim();
-            const vassaVal = document.getElementById('walkin-vassa').value.trim();
-            const phone = document.getElementById('walkin-phone').value.trim();
-            const temple = document.getElementById('walkin-temple').value.trim();
-
-            // ตรวจสอบข้อมูลจำเป็น
-            if (!firstName || !temple) {
-                alert("กรุณากรอก ชื่อ และ สังกัดวัด/หน่วยงาน ให้ครบถ้วนครับ");
-                return;
-            }
-
-            // จัดการเรื่องพรรษา ถ้าไม่กรอกให้เป็น null
-            let vassaNum = vassaVal ? parseInt(vassaVal, 10) : null;
-
-            // สร้าง Object คนใหม่ (ให้ id เป็นค่ามากสุด + 1 เสมอ)
-            const newId = attendees.length > 0 ? Math.max(...attendees.map(p => p.id)) + 1 : 1;
-            
-            const newPerson = {
-                id: newId,
-                regId: regId || `WALK-000`, 
-                vassa: vassaNum,
-                phone: phone || "-",
-                prefix: prefix,
-                firstName: firstName,
-                lastName: lastName,
-                temple: temple,
-                day1: false, 
-                day2: false, 
-                wifi: null,
-                isNew: true // ใส่ Flag ว่าคนนี้เพิ่งเพิ่ม จะได้มีไฮไลต์สีฟ้า
-            };
-
-            // ดันข้อมูลใหม่ไปไว้บนสุดของ Array (ตำแหน่งที่ 0)
-            attendees.unshift(newPerson);
-
-            // ล้างช่องค้นหาเพื่อให้เห็นรายชื่อใหม่ชัดเจน
-            document.getElementById('searchInput').value = '';
-            
-            // ปิดหน้าต่าง และ รีเฟรชตาราง
-            closeWalkInModal();
-            handleSearch();
-            
-            // เลื่อนตารางขึ้นบนสุด
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const rid = document.getElementById('walkin-regId').value.trim();
+            const pre = document.getElementById('walkin-prefix').value.trim();
+            const fn = document.getElementById('walkin-firstname').value.trim();
+            const ln = document.getElementById('walkin-lastname').value.trim();
+            const vassa = document.getElementById('walkin-vassa').value.trim();
+            const temp = document.getElementById('walkin-temple').value.trim();
+            const prov = document.getElementById('walkin-province').value.trim();
+            if (!fn || !temp || !prov) { alert("กรุณากรอกข้อมูลให้ครบถ้วน"); return; }
+            attendees.unshift({
+                id: Date.now(), regId: rid, prefix: pre, firstName: fn, lastName: ln,
+                vassa: vassa ? parseInt(vassa, 10) : null,
+                phone: document.getElementById('walkin-phone').value || "-",
+                temple: temp, province: prov, day1: false, day2: false, wifi: null, isNew: true
+            });
+            closeWalkInModal(); handleSearch();
         }
 
-
-        // Handle Checkbox Toggle logic (Registration & WiFi generation)
-        function handleRegistration(personId, dayNumber, isChecked) {
-            const personIndex = attendees.findIndex(p => p.id === personId);
-            if (personIndex === -1) return;
-            const person = attendees[personIndex];
-
-            if (dayNumber === 1) person.day1 = isChecked;
-            if (dayNumber === 2) person.day2 = isChecked;
-
-            let showOverlay = false;
-
-            if (isChecked && !person.wifi) {
+        function handleRegistration(id, day, check) {
+            const p = attendees.find(x => x.id === id);
+            if (!p) return;
+            if (day === 1) p.day1 = check; else p.day2 = check;
+            if (check && !p.wifi) {
                 if (currentWifiCounter <= 200) {
-                    let numStr = currentWifiCounter < 10 ? '0' + currentWifiCounter : currentWifiCounter;
-                    person.wifi = `AI${numStr}`;
+                    p.wifi = `AI${currentWifiCounter.toString().padStart(2, '0')}`;
                     currentWifiCounter++;
-                    showOverlay = true; 
-                } else {
-                    alert("รหัส WiFi ถึงขีดจำกัดแล้ว (AI200)");
-                }
-            } else if (isChecked && person.wifi) {
-                showOverlay = true;
-            }
-
-            if (showOverlay) {
-                openPhotoView(person);
-            }
-            
-            const wifiCell = document.getElementById(`wifi-cell-${person.id}`);
-            if(wifiCell) {
-                wifiCell.innerHTML = person.wifi ? `<span class="bg-gray-800 text-yellow-400 font-mono px-2 py-1 rounded text-sm">${person.wifi}</span>` : `<span class="text-gray-400">-</span>`;
-            }
+                    openPhotoView(p);
+                } else alert("รหัส WiFi เต็มแล้ว");
+            } else if (check) openPhotoView(p);
+            const cell = document.getElementById(`wifi-cell-${p.id}`);
+            if(cell) cell.innerHTML = p.wifi ? `<span class="bg-gray-800 text-yellow-400 font-mono px-2 py-1 rounded text-sm">${p.wifi}</span>` : `<span class="text-gray-400">-</span>`;
         }
 
-        // ==========================================
-        // OVERLAY 1: PROFILE DETAILS VIEW (คลิกแถบรายชื่อดูเฉยๆ)
-        // ==========================================
-        function openProfileView(personId) {
-            const person = attendees.find(p => p.id === personId);
-            if (!person) return;
-
-            document.getElementById('profile-reg-id').innerText = person.regId;
-            document.getElementById('profile-name').innerText = `${person.prefix} ${person.firstName} ${person.lastName}`;
-            document.getElementById('profile-temple').innerText = person.temple;
-
+        function openProfileView(id) {
+            const p = attendees.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('profile-reg-id').innerText = p.regId;
+            document.getElementById('profile-name').innerText = getFullName(p);
+            document.getElementById('profile-temple').innerText = p.temple;
+            document.getElementById('profile-province').innerText = p.province;
             document.getElementById('profile-overlay').classList.remove('hidden-view');
         }
 
-        function closeProfileView() {
-            document.getElementById('profile-overlay').classList.add('hidden-view');
-        }
-
-
-        // ==========================================
-        // OVERLAY 2: PHOTO VIEW (เช็คอินสำเร็จ) + แก้ไขข้อมูล
-        // ==========================================
-        function openPhotoView(person) {
-            currentPhotoPersonId = person.id; 
-
-            document.getElementById('photo-reg-id').innerText = person.regId;
-            document.getElementById('photo-name').innerText = `${person.prefix} ${person.firstName}  ${person.lastName}`;
-            
-            // ซ่อนคำว่าพรรษาถ้าเป็นฆราวาส (vassa = null)
-            let templeDisplay = person.vassa ? `${person.temple} (พรรษา ${person.vassa})` : person.temple;
-            document.getElementById('photo-temple').innerText = templeDisplay;
-            
-            document.getElementById('photo-wifi-user').innerText = person.wifi || 'N/A';
-            document.getElementById('photo-wifi-pass').innerText = person.wifi || 'N/A';
-
+        function openPhotoView(p) {
+            currentPhotoPersonId = p.id;
+            document.getElementById('photo-reg-id').innerText = p.regId;
+            document.getElementById('photo-name').innerText = getFullName(p);
+            document.getElementById('photo-temple').innerText = p.vassa ? `${p.temple} (พรรษา ${p.vassa})` : p.temple;
+            document.getElementById('photo-province').innerText = p.province;
+            document.getElementById('photo-wifi-user').innerText = p.wifi || 'N/A';
+            document.getElementById('photo-wifi-pass').innerText = p.wifi || 'N/A';
             togglePhotoEditMode(false);
             document.getElementById('photo-overlay').classList.remove('hidden-view');
         }
 
-        function togglePhotoEditMode(isEdit) {
-            const viewMode = document.getElementById('photo-view-mode');
-            const editMode = document.getElementById('photo-edit-mode');
-
-            if (isEdit) {
-                const person = attendees.find(p => p.id === currentPhotoPersonId);
-                document.getElementById('photo-edit-prefix').value = person.prefix;
-                document.getElementById('photo-edit-firstname').value = person.firstName;
-                document.getElementById('photo-edit-lastname').value = person.lastName;
-                document.getElementById('photo-edit-temple').value = person.temple;
-
-                viewMode.classList.add('hidden-view');
-                editMode.classList.remove('hidden-view');
-            } else {
-                editMode.classList.add('hidden-view');
-                viewMode.classList.remove('hidden-view');
+        function togglePhotoEditMode(edit) {
+            document.getElementById('photo-view-mode').classList.toggle('hidden-view', edit);
+            document.getElementById('photo-edit-mode').classList.toggle('hidden-view', !edit);
+            if (edit) {
+                const p = attendees.find(x => x.id === currentPhotoPersonId);
+                document.getElementById('photo-edit-prefix').value = p.prefix;
+                document.getElementById('photo-edit-firstname').value = p.firstName;
+                document.getElementById('photo-edit-lastname').value = p.lastName;
+                document.getElementById('photo-edit-temple').value = p.temple;
+                document.getElementById('photo-edit-province').value = p.province;
             }
         }
 
         function savePhotoProfile() {
-            const person = attendees.find(p => p.id === currentPhotoPersonId);
-            if (!person) return;
-
-            person.prefix = document.getElementById('photo-edit-prefix').value.trim();
-            person.firstName = document.getElementById('photo-edit-firstname').value.trim();
-            person.lastName = document.getElementById('photo-edit-lastname').value.trim();
-            person.temple = document.getElementById('photo-edit-temple').value.trim();
-
-            document.getElementById('photo-name').innerText = `${person.prefix} ${person.firstName}  ${person.lastName}`;
-            
-            // อัปเดตหน้าจอถ่ายรูปใหม่หลังบันทึก
-            let templeDisplay = person.vassa ? `${person.temple} (พรรษา ${person.vassa})` : person.temple;
-            document.getElementById('photo-temple').innerText = templeDisplay;
-
-            togglePhotoEditMode(false);
-            handleSearch();
+            const p = attendees.find(x => x.id === currentPhotoPersonId);
+            p.prefix = document.getElementById('photo-edit-prefix').value;
+            p.firstName = document.getElementById('photo-edit-firstname').value;
+            p.lastName = document.getElementById('photo-edit-lastname').value;
+            p.temple = document.getElementById('photo-edit-temple').value;
+            p.province = document.getElementById('photo-edit-province').value;
+            openPhotoView(p); handleSearch();
         }
 
-        function closePhotoView() {
-            document.getElementById('photo-overlay').classList.add('hidden-view');
-            handleSearch();
-        }
+        function closeWalkInModal() { document.getElementById('walkin-overlay').classList.add('hidden-view'); }
+        function closeProfileView() { document.getElementById('profile-overlay').classList.add('hidden-view'); }
+        function closePhotoView() { document.getElementById('photo-overlay').classList.add('hidden-view'); handleSearch(); }
 
-        // --- Dashboard & Export Logic ---
         function updateDashboard() {
-            let totalRegistered = 0;
-            let day1Count = 0;
-            let day2Count = 0;
-            let registeredUsers = [];
-
-            attendees.forEach(p => {
-                if (p.day1 || p.day2) {
-                    totalRegistered++;
-                    registeredUsers.push(p);
-                }
-                if (p.day1) day1Count++;
-                if (p.day2) day2Count++;
+            let t = 0, d1 = 0, d2 = 0;
+            const regUsers = attendees.filter(p => {
+                if (p.day1 || p.day2) t++;
+                if (p.day1) d1++; if (p.day2) d2++;
+                return p.day1 || p.day2;
             });
-
-            document.getElementById('stat-total').innerText = totalRegistered;
-            document.getElementById('stat-day1').innerText = day1Count;
-            document.getElementById('stat-day2').innerText = day2Count;
-
-            renderChart(day1Count, day2Count);
-
-            const sumBody = document.getElementById('summaryTableBody');
-            sumBody.innerHTML = '';
-            registeredUsers.forEach(p => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-2 border-b border-gray-100 font-bold">${p.regId}</td>
-                    <td class="p-2 border-b border-gray-100">${p.prefix}${p.firstName} ${p.lastName}</td>
-                    <td class="p-2 border-b border-gray-100 text-center">${p.day1 ? '✅' : '-'}</td>
-                    <td class="p-2 border-b border-gray-100 text-center">${p.day2 ? '✅' : '-'}</td>
-                    <td class="p-2 border-b border-gray-100 text-center font-mono text-xs">${p.wifi}</td>
-                `;
-                sumBody.appendChild(tr);
-            });
+            document.getElementById('stat-total').innerText = t;
+            document.getElementById('stat-day1').innerText = d1;
+            document.getElementById('stat-day2').innerText = d2;
+            renderChart(d1, d2);
+            const body = document.getElementById('summaryTableBody');
+            body.innerHTML = regUsers.map(p => `
+                <tr>
+                    <td class="p-2 border-b font-bold">${p.regId}</td>
+                    <td class="p-2 border-b name-display">${getFullName(p)}</td>
+                    <td class="p-2 border-b">${p.province}</td>
+                    <td class="p-2 border-b text-center">${p.day1 ? '✅' : '-'}</td>
+                    <td class="p-2 border-b text-center">${p.day2 ? '✅' : '-'}</td>
+                    <td class="p-2 border-b text-center font-mono text-xs">${p.wifi}</td>
+                </tr>
+            `).join('');
         }
 
         function renderChart(d1, d2) {
             const ctx = document.getElementById('attendanceChart').getContext('2d');
-            
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
-
+            if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: ['วันที่ 1', 'วันที่ 2'],
-                    datasets: [{
-                        data: [d1, d2],
-                        backgroundColor: [
-                            'rgba(249, 115, 22, 0.8)', 
-                            'rgba(34, 197, 94, 0.8)'   
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ` ${context.label}: ${context.raw} รูป/คน`;
-                                }
-                            }
-                        }
-                    }
-                }
+                data: { labels: ['วันที่ 1', 'วันที่ 2'], datasets: [{ data: [d1, d2], backgroundColor: ['rgba(249, 115, 22, 0.8)', 'rgba(34, 197, 94, 0.8)'], borderWidth: 1 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
         }
 
-        // Export to CSV Function
         function exportCSV() {
-            let csvContent = "\uFEFF"; 
-            
-            csvContent += "ลำดับ,รหัสลงทะเบียน,คำนำหน้า/ฉายา,ชื่อ,นามสกุล,พรรษา,เบอร์โทรศัพท์,สังกัดวัด,มาวันที่ 1,มาวันที่ 2,รหัส WiFi\n";
-
-            // สลับข้อมูลให้เรียงตาม ID หรือลำดับเดิมที่แท้จริงก่อนพิมพ์ออก (อิงจากผู้ลงทะเบียนใหม่สุดอยู่บนหรือล่างก็ได้)
-            // ในที่นี้เราจะ print ตามที่เห็นในจอ หรือจะตามเลข ID ก็ได้
-            
-            attendees.forEach((row, index) => {
-                let d1 = row.day1 ? 'มา' : 'ไม่มา';
-                let d2 = row.day2 ? 'มา' : 'ไม่มา';
-                let wifi = row.wifi || '-';
-                
-                let vassaOut = row.vassa ? row.vassa : '-';
-
-                let rowArray = [
-                    index + 1, 
-                    row.regId,
-                    row.prefix, 
-                    row.firstName, 
-                    row.lastName, 
-                    vassaOut,
-                    row.phone,
-                    row.temple, 
-                    d1, 
-                    d2, 
-                    wifi
-                ];
-                csvContent += rowArray.join(",") + "\n";
+            // Note: 2 spaces between First and Last name in CSV
+            let csv = "\uFEFFลำดับ,รหัสประจำตัว,ชื่อ - สกุล / ฉายา,พรรษา,เบอร์โทร,วัด,จังหวัด,วัน 1,วัน 2,WiFi\n";
+            attendees.forEach((p, i) => {
+                const name = getFullName(p);
+                csv += `${i+1},${p.regId},"${name}",${p.vassa || '-'},${p.phone},${p.temple},${p.province},${p.day1?'มา':'ไม่'},${p.day2?'มา':'ไม่'},${p.wifi||'-'}\n`;
             });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            
             const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", "รายงานลงทะเบียนประชุม.csv");
-            document.body.appendChild(link);
-            
+            link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            link.download = "รายงานลงทะเบียน.csv";
             link.click();
-            
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
         }
 
-        // Run on load
         window.onload = init;
-
     </script>
 </body>
 </html>
