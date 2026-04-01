@@ -51,20 +51,21 @@
         </div>
         <div class="flex gap-4">
             <button onclick="switchView('registration')" id="nav-reg" class="bg-orange-700 hover:bg-orange-800 px-4 py-2 rounded transition font-medium">หน้าลงทะเบียน</button>
-            <button onclick="switchView('dashboard')" id="nav-dash" class="hover:bg-orange-500 px-4 py-2 rounded transition font-medium">สรุปผลเบิกงบ</button>
+            <button onclick="switchView('dashboard')" id="nav-dash" class="hover:bg-orange-500 px-4 py-2 rounded transition font-medium">สรุปผล</button>
         </div>
     </nav>
 
     <!-- Main Content Area -->
-    <main class="flex-grow pt-20 p-4 md:p-8 overflow-auto">
+    <!-- เพิ่ม pt-28 (Padding Top) ให้เนื้อหาขยับลงมา ไม่ชิดขอบบนเกินไป -->
+    <main class="flex-grow pt-28 p-4 md:p-8 overflow-auto">
 
         <!-- ========================================== -->
         <!-- VIEW 1: REGISTRATION & SEARCH -->
         <!-- ========================================== -->
-        <section id="view-registration" class="max-w-6xl mx-auto">
-            <div class="mb-6">
-                <h1 class="text-2xl md:text-3xl font-bold text-orange-800 mb-2">ค้นหาและลงทะเบียนผู้เข้าร่วมงาน</h1>
-                <p class="text-gray-600">พิมพ์รหัสประจำตัว ชื่อ หรือเบอร์โทรศัพท์ ในช่องด้านล่างเพื่อค้นหา จากนั้นกดติ๊กถูกในช่องวันที่มาเพื่อยืนยัน (สามารถกดที่แถบรายชื่อเพื่อดูข้อมูลแบบเต็มหน้าจอได้)</p>
+        <section id="view-registration" class="max-w-6xl mx-auto mt-2">
+            <div class="mb-8">
+                <h1 class="text-2xl md:text-3xl font-bold text-orange-800 mb-3">ค้นหาและลงทะเบียนผู้เข้าร่วมงาน</h1>
+                <p class="text-gray-600 text-lg">พิมพ์รหัสประจำตัว ชื่อ หรือเบอร์โทรศัพท์ ในช่องด้านล่างเพื่อค้นหา จากนั้นกดติ๊กถูกในช่องวันที่มาเพื่อยืนยัน <br><span class="text-sm text-gray-500 mt-1 inline-block">(สามารถกดที่แถบรายชื่อเพื่อดูข้อมูลแบบเต็มหน้าจอได้)</span></p>
             </div>
 
             <!-- Search Box -->
@@ -105,8 +106,8 @@
         <!-- ========================================== -->
         <!-- VIEW 2: DASHBOARD & SUMMARY -->
         <!-- ========================================== -->
-        <section id="view-dashboard" class="max-w-6xl mx-auto hidden-view">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <section id="view-dashboard" class="max-w-6xl mx-auto hidden-view mt-2">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
                     <h1 class="text-2xl md:text-3xl font-bold text-orange-800 mb-2">สรุปผลการลงทะเบียน</h1>
                     <p class="text-gray-600">ข้อมูลสำหรับตรวจสอบและดาวน์โหลดเพื่อนำไปเบิกงบประมาณ</p>
@@ -116,20 +117,7 @@
                 </button>
             </div>
 
-            <!-- AI Summary Section -->
-            <div class="bg-gradient-to-r from-orange-100 to-yellow-50 p-6 rounded-xl shadow-sm border border-orange-200 mb-8 relative overflow-hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-orange-800 flex items-center gap-2">✨ AI สรุปภาพรวมงาน</h3>
-                    <button onclick="generateAISummary()" class="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white px-4 py-2 rounded-lg shadow font-medium transition flex items-center gap-2">
-                        <span>✨</span> วิเคราะห์ข้อมูลด้วย AI
-                    </button>
-                </div>
-                <div id="ai-summary-result" class="text-gray-800 text-lg leading-relaxed min-h-[3rem]">
-                    <span class="text-gray-500 italic">กดปุ่มด้านบนเพื่อให้ AI (Gemini) ช่วยประมวลผลและสรุปแนวโน้มการเข้าร่วมงาน...</span>
-                </div>
-            </div>
-
-            <!-- Stats Grid -->
+            <!-- Stats Grid (เอาส่วน AI ออกไปแล้ว) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white rounded-xl shadow border-l-4 border-blue-500 p-6">
                     <p class="text-gray-500 text-sm font-semibold mb-1">ยอดผู้ลงทะเบียนทั้งหมด (มี WiFi)</p>
@@ -186,51 +174,69 @@
         <div class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-[3rem] shadow-2xl border-8 border-orange-200 p-12 md:p-20 relative text-center">
             
             <!-- Close Button -->
-            <button onclick="closeProfileView()" class="absolute top-8 right-8 bg-gray-200 hover:bg-red-100 hover:text-red-600 text-gray-600 rounded-full w-16 h-16 flex items-center justify-center text-3xl transition-colors duration-300">
+            <button onclick="closeProfileView()" class="absolute top-8 right-8 bg-gray-200 hover:bg-red-100 hover:text-red-600 text-gray-600 rounded-full w-16 h-16 flex items-center justify-center text-3xl transition-colors duration-300 shadow-sm">
                 ✕
             </button>
-
-            <!-- Main Title -->
-            <h2 class="text-gray-500 text-2xl md:text-3xl font-light mb-6">ข้อมูลผู้ลงทะเบียน</h2>
             
-            <!-- รหัสประจำตัว (Registration ID) - ชัดเจนตรงกลาง -->
-            <div class="bg-orange-100 inline-block px-10 py-3 rounded-2xl border-2 border-orange-300 mb-8 shadow-inner">
+            <!-- รหัสประจำตัว (Registration ID) -->
+            <div class="bg-orange-100 inline-block px-10 py-3 rounded-2xl border-2 border-orange-300 mb-10 mt-4 shadow-inner">
                 <span class="text-3xl text-orange-800 mr-3">รหัสประจำตัว:</span>
                 <span id="profile-reg-id" class="text-5xl md:text-6xl font-bold text-orange-600 tracking-widest drop-shadow-sm">
                     <!-- Reg ID จะมาโชว์ที่นี่ -->
                 </span>
             </div>
 
-            <!-- ชื่อ-นามสกุล -->
-            <h1 id="profile-name" class="text-6xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight drop-shadow-sm text-transparent bg-clip-text bg-gradient-to-r from-orange-800 to-yellow-800">
-                <!-- Name -->
-            </h1>
+            <!-- VIEW MODE (โหมดดูข้อมูลปกติ) -->
+            <div id="profile-view-mode">
+                <!-- ชื่อ-นามสกุล -->
+                <h1 id="profile-name" class="text-6xl md:text-7xl font-bold text-gray-800 mb-8 leading-tight drop-shadow-sm text-transparent bg-clip-text bg-gradient-to-r from-orange-800 to-yellow-800">
+                    <!-- Name -->
+                </h1>
 
-            <div class="w-32 h-2 bg-orange-300 mx-auto rounded-full mb-8"></div>
+                <div class="w-32 h-2 bg-orange-300 mx-auto rounded-full mb-8"></div>
 
-            <!-- ชื่อวัด -->
-            <h3 id="profile-temple" class="text-4xl md:text-5xl text-orange-700 font-medium mb-12">
-                <!-- Temple -->
-            </h3>
+                <!-- ชื่อวัด -->
+                <h3 id="profile-temple" class="text-4xl md:text-5xl text-orange-700 font-medium mb-10">
+                    <!-- Temple -->
+                </h3>
 
-            <!-- พรรษา และ เบอร์โทรศัพท์ -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-2xl md:text-3xl text-gray-700 bg-orange-50/50 p-8 rounded-3xl border border-orange-100">
-                <div class="flex flex-col items-center justify-center">
-                    <span class="text-gray-500 text-xl mb-1">อายุพรรษา</span>
-                    <span id="profile-vassa" class="font-bold text-orange-600 text-4xl"></span>
-                </div>
-                <div class="flex flex-col items-center justify-center">
-                    <span class="text-gray-500 text-xl mb-1">เบอร์โทรศัพท์ติดต่อ</span>
-                    <span id="profile-phone" class="font-bold text-orange-600 text-4xl"></span>
-                </div>
-            </div>
-
-            <!-- Action Area -->
-            <div class="mt-16">
-                <button onclick="closeProfileView()" class="bg-gray-800 hover:bg-gray-900 text-white text-2xl font-medium py-4 px-16 rounded-full shadow-xl transition transform hover:-translate-y-1 hover:shadow-2xl">
-                    กลับไปหน้าลงทะเบียน
+                <!-- ปุ่มแก้ไขข้อมูล -->
+                <button onclick="toggleEditMode(true)" class="bg-orange-100 hover:bg-orange-200 text-orange-700 text-2xl font-medium py-3 px-8 rounded-full transition shadow-sm border border-orange-200 flex items-center gap-2 mx-auto">
+                    <span>✏️</span> แก้ไขข้อมูล
                 </button>
             </div>
+
+            <!-- EDIT MODE (โหมดแก้ไขข้อมูล) -->
+            <div id="profile-edit-mode" class="hidden-view flex flex-col items-center gap-6 w-full max-w-3xl mx-auto mt-4">
+                <div class="flex flex-col md:flex-row gap-4 w-full text-left">
+                    <div class="w-full md:w-1/4">
+                        <label class="text-gray-500 mb-1 block">คำนำหน้า</label>
+                        <input type="text" id="edit-prefix" class="border-2 border-orange-200 rounded-2xl p-4 text-2xl w-full focus:border-orange-500 outline-none">
+                    </div>
+                    <div class="w-full md:w-2/4">
+                        <label class="text-gray-500 mb-1 block">ชื่อ</label>
+                        <input type="text" id="edit-firstname" class="border-2 border-orange-200 rounded-2xl p-4 text-2xl w-full focus:border-orange-500 outline-none">
+                    </div>
+                    <div class="w-full md:w-2/4">
+                        <label class="text-gray-500 mb-1 block">ฉายา/นามสกุล</label>
+                        <input type="text" id="edit-lastname" class="border-2 border-orange-200 rounded-2xl p-4 text-2xl w-full focus:border-orange-500 outline-none">
+                    </div>
+                </div>
+                <div class="w-full text-left">
+                    <label class="text-gray-500 mb-1 block">สังกัดวัด</label>
+                    <input type="text" id="edit-temple" class="border-2 border-orange-200 rounded-2xl p-4 text-2xl w-full focus:border-orange-500 outline-none">
+                </div>
+                
+                <div class="flex gap-4 mt-6">
+                    <button onclick="saveProfile()" class="bg-green-600 hover:bg-green-700 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transition transform hover:-translate-y-1">
+                        💾 บันทึกข้อมูล
+                    </button>
+                    <button onclick="toggleEditMode(false)" class="bg-gray-400 hover:bg-gray-500 text-white text-2xl font-medium py-4 px-10 rounded-full shadow-md transition">
+                        ยกเลิก
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -296,41 +302,9 @@
     <script>
         const apiKey = "";
         
-        // --- Gemini API Call with Exponential Backoff ---
-        async function fetchWithRetry(url, options, retries = 5) {
-            const delays = [1000, 2000, 4000, 8000, 16000];
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return await response.json();
-                } catch (error) {
-                    if (i === retries - 1) throw error;
-                    await new Promise(res => setTimeout(res, delays[i]));
-                }
-            }
-        }
-
-        async function callGemini(prompt) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const payload = { contents: [{ parts: [{ text: prompt }] }] };
-            try {
-                const data = await fetchWithRetry(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                return data.candidates?.[0]?.content?.parts?.[0]?.text || "ไม่สามารถสร้างข้อความได้";
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                return "ขออภัย ไม่สามารถดึงข้อมูลจาก AI ได้ในขณะนี้";
-            }
-        }
-
-        // --- State Management & Mock Data ---
-        
         let currentWifiCounter = 1; 
         let chartInstance = null;
+        let currentViewPersonId = null; // เพิ่มตัวแปรเก็บว่ากำลังเปิดดูใครอยู่
 
         const firstNames = ["กิตติ", "วิชาญ", "ประเสริฐ", "สมศักดิ์", "วิชัย", "สมชาย", "มานพ", "อำนวย", "สุชาติ", "สมเกียรติ", "ณรงค์", "ธวัชชัย", "สมบูรณ์", "พรชัย", "เจริญ"];
         const lastNames = ["รักสงบ", "สิริจนฺโท", "ธมฺมทินฺโน", "ชุติมนฺโต", "ฐิตธมฺโม", "เตชวโร", "สุสิริ", "ปสาทิโก", "โชติโก", "สุปญฺโญ", "ใจดี", "มีสุข", "บุญมาก", "ปญฺญาคโม"];
@@ -486,20 +460,17 @@
             const person = attendees.find(p => p.id === personId);
             if (!person) return;
 
+            currentViewPersonId = personId;
+
             // ใส่ข้อมูลรหัสประจำตัว
             document.getElementById('profile-reg-id').innerText = person.regId;
             
-            // ใส่ข้อมูลอื่นๆ
+            // ใส่ข้อมูลสำหรับการแสดงผล
             document.getElementById('profile-name').innerText = `${person.prefix} ${person.firstName} ${person.lastName}`;
-            document.getElementById('profile-temple').innerText = `วัด: ${person.temple}`;
-            document.getElementById('profile-vassa').innerText = `${person.vassa} พรรษา`;
-            
-            // จัดรูปแบบเบอร์โทรศัพท์ (080-880-7646)
-            let phoneStr = person.phone;
-            if(phoneStr && phoneStr.length === 10) {
-                phoneStr = `${phoneStr.substring(0,3)}-${phoneStr.substring(3,6)}-${phoneStr.substring(6,10)}`;
-            }
-            document.getElementById('profile-phone').innerText = phoneStr;
+            document.getElementById('profile-temple').innerText = person.temple;
+
+            // รีเซ็ตให้กลับไปหน้า View Mode เสมอเวลาเปิดขึ้นมาใหม่
+            toggleEditMode(false);
 
             // แสดง Overlay
             document.getElementById('profile-overlay').classList.remove('hidden-view');
@@ -509,13 +480,56 @@
             document.getElementById('profile-overlay').classList.add('hidden-view');
         }
 
+        function toggleEditMode(isEdit) {
+            const viewMode = document.getElementById('profile-view-mode');
+            const editMode = document.getElementById('profile-edit-mode');
+
+            if (isEdit) {
+                // ดึงข้อมูลปัจจุบันมาใส่ในช่องกรอก
+                const person = attendees.find(p => p.id === currentViewPersonId);
+                document.getElementById('edit-prefix').value = person.prefix;
+                document.getElementById('edit-firstname').value = person.firstName;
+                document.getElementById('edit-lastname').value = person.lastName;
+                document.getElementById('edit-temple').value = person.temple;
+
+                viewMode.classList.add('hidden-view');
+                editMode.classList.remove('hidden-view');
+            } else {
+                editMode.classList.add('hidden-view');
+                viewMode.classList.remove('hidden-view');
+            }
+        }
+
+        function saveProfile() {
+            const person = attendees.find(p => p.id === currentViewPersonId);
+            if (!person) return;
+
+            // ดึงค่าจากช่องกรอกไปอัปเดตในข้อมูลหลัก
+            person.prefix = document.getElementById('edit-prefix').value.trim();
+            person.firstName = document.getElementById('edit-firstname').value.trim();
+            person.lastName = document.getElementById('edit-lastname').value.trim();
+            person.temple = document.getElementById('edit-temple').value.trim();
+
+            // อัปเดตข้อมูลบนหน้าจอ Profile (View Mode) ทันที
+            document.getElementById('profile-name').innerText = `${person.prefix} ${person.firstName} ${person.lastName}`;
+            document.getElementById('profile-temple').innerText = person.temple;
+
+            // ปิดโหมดแก้ไข
+            toggleEditMode(false);
+
+            // อัปเดตตารางหน้าหลัก (ผ่านการค้นหาเพื่อรีเฟรชหน้าจอ)
+            handleSearch();
+        }
+
         // ==========================================
         // OVERLAY 2: PHOTO VIEW (เช็คอินสำเร็จ)
         // ==========================================
         function openPhotoView(person) {
             document.getElementById('photo-reg-id').innerText = person.regId;
             document.getElementById('photo-name').innerText = `${person.prefix} ${person.firstName}  ${person.lastName}`;
-            document.getElementById('photo-temple').innerText = `วัด: ${person.temple} (พรรษา ${person.vassa})`;
+            
+            // เอาคำว่า "วัด:" ออก เหลือแค่ชื่อวัดและพรรษา
+            document.getElementById('photo-temple').innerText = `${person.temple} (พรรษา ${person.vassa})`;
             
             document.getElementById('photo-wifi-user').innerText = person.wifi || 'N/A';
             document.getElementById('photo-wifi-pass').innerText = person.wifi || 'N/A';
@@ -600,37 +614,6 @@
                     }
                 }
             });
-        }
-
-        // AI Summary Generator
-        async function generateAISummary() {
-            const resultBox = document.getElementById('ai-summary-result');
-            resultBox.innerHTML = '<div class="flex items-center gap-3"><svg class="animate-spin h-6 w-6 text-orange-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span class="text-gray-600 font-medium">กำลังให้ AI ประมวลผลข้อมูลและดึง Insight สำคัญ...</span></div>';
-            
-            const attendedUsers = attendees.filter(p => p.day1 || p.day2);
-            if(attendedUsers.length === 0) {
-                resultBox.innerHTML = '<span class="text-orange-500 font-medium">ยังไม่มีผู้ลงทะเบียนเข้าร่วมงานให้วิเคราะห์ครับ กรุณาติ๊กถูกในตารางก่อน</span>';
-                return;
-            }
-
-            const summaryData = attendedUsers.map(p => ({
-                name: `${p.prefix}${p.firstName} ${p.lastName}`,
-                temple: p.temple,
-                days: (p.day1 && p.day2) ? 'มาครบ 2 วัน' : (p.day1 ? 'มาแค่วันที่ 1' : 'มาแค่วันที่ 2')
-            }));
-
-            const prompt = `ในฐานะผู้ช่วยวิเคราะห์ข้อมูลงานประชุม กรุณาวิเคราะห์ข้อมูลผู้เข้าร่วมงานต่อไปนี้และเขียนสรุปสั้นๆ (ประมาณ 3-4 บรรทัด) โดยสรุปประเด็นต่อไปนี้ให้ครบถ้วน:
-            1. มีผู้เข้าร่วมทั้งหมดกี่รูป/คน
-            2. วัดใดส่งตัวแทนมาเยอะที่สุด หรือมีแนวโน้มกระจายตัวจากหลายวัด
-            3. แนวโน้มการเข้าร่วม (มาวันไหนมากกว่ากัน หรือส่วนใหญ่มาครบ 2 วันหรือไม่)
-            
-            ข้อมูลดิบการลงทะเบียน (JSON):
-            ${JSON.stringify(summaryData)}
-            
-            ตอบเป็นภาษาไทยที่เป็นทางการ อ่านง่าย กระชับ ตรงประเด็น ไม่ต้องมีคำขึ้นต้นหรือลงท้าย`;
-
-            const summaryText = await callGemini(prompt);
-            resultBox.innerHTML = `<p class="whitespace-pre-line text-gray-800 text-lg"><strong>✨ สรุปจาก AI:</strong> ${summaryText}</p>`;
         }
 
         // Export to CSV Function
