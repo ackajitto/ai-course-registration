@@ -49,7 +49,11 @@
         <div class="text-xl md:text-2xl font-semibold flex items-center gap-2 whitespace-nowrap">
             <span>📝</span> ระบบลงทะเบียน
         </div>
-        <div class="flex gap-2 md:gap-4">
+        <div class="flex gap-2 md:gap-4 flex-wrap justify-end">
+            <!-- ปุ่มลงทะเบียนเพิ่มเติม (เปลี่ยนข้อความแล้ว) -->
+            <button onclick="openWalkInModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:px-4 md:py-2 rounded transition font-medium text-sm md:text-base whitespace-nowrap shadow-md border border-blue-500">
+                + เพิ่มรายชื่อ
+            </button>
             <button onclick="switchView('registration')" id="nav-reg" class="bg-orange-700 hover:bg-orange-800 px-3 py-2 md:px-4 md:py-2 rounded transition font-medium text-sm md:text-base whitespace-nowrap">หน้าลงทะเบียน</button>
             <button onclick="switchView('dashboard')" id="nav-dash" class="hover:bg-orange-500 px-3 py-2 md:px-4 md:py-2 rounded transition font-medium text-sm md:text-base whitespace-nowrap">สรุปผล</button>
         </div>
@@ -82,7 +86,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-sm font-semibold text-orange-800 uppercase tracking-wider">ลำดับ</th>
                             <th class="px-6 py-3 text-left text-sm font-semibold text-orange-800 uppercase tracking-wider">รหัสประจำตัว</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-orange-800 uppercase tracking-wider">ฉายา/ชื่อ-สกุล</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-orange-800 uppercase tracking-wider whitespace-nowrap">ฉายา/ชื่อ-สกุล</th>
                             <th class="px-6 py-3 text-center text-sm font-semibold text-orange-800 uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSortVassa()" title="คลิกเพื่อเรียงตามพรรษา">
                                 พรรษา
                                 <span id="sort-vassa-icon" class="ml-1 text-orange-500 text-base">🔽</span>
@@ -167,6 +171,67 @@
         </section>
 
     </main>
+
+    <!-- ========================================== -->
+    <!-- OVERLAY 0: WALK-IN REGISTRATION (เพิ่มรายชื่อใหม่) -->
+    <!-- ========================================== -->
+    <div id="walkin-overlay" class="fixed inset-0 bg-black/50 z-50 hidden-view flex flex-col justify-center items-center p-4 md:p-8 overflow-y-auto">
+        <div class="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl w-full max-w-3xl relative border-t-8 border-blue-500">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                <span>➕</span> เพิ่มรายชื่อผู้เข้าร่วมงาน
+            </h2>
+            <p class="text-gray-500 mb-8">กรุณากรอกข้อมูลเพื่อเพิ่มรายชื่อลงในระบบ</p>
+
+            <div class="flex flex-col gap-5">
+                <!-- รหัสประจำตัว -->
+                <div>
+                    <label class="text-gray-600 mb-1 block font-medium">รหัสประจำตัว <span class="text-gray-400 text-sm">(รันอัตโนมัติจากล่าสุด หรือแก้ไขได้)</span></label>
+                    <input type="text" id="walkin-regId" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none bg-blue-50 font-bold text-blue-800">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="md:col-span-1">
+                        <label class="text-gray-600 mb-1 block font-medium">คำนำหน้า/ฉายา</label>
+                        <input type="text" id="walkin-prefix" placeholder="เช่น พระมหา, นาย" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                    <div class="md:col-span-1">
+                        <label class="text-gray-600 mb-1 block font-medium">ชื่อ <span class="text-red-500">*</span></label>
+                        <input type="text" id="walkin-firstname" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                    <div class="md:col-span-1">
+                        <label class="text-gray-600 mb-1 block font-medium">นามสกุล</label>
+                        <input type="text" id="walkin-lastname" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="text-gray-600 mb-1 block font-medium">อายุพรรษา <span class="text-gray-400 text-sm">(ปล่อยว่างได้หากเป็นฆราวาส)</span></label>
+                        <input type="number" id="walkin-vassa" placeholder="ระบุตัวเลข" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-gray-600 mb-1 block font-medium">เบอร์โทรศัพท์</label>
+                        <input type="text" id="walkin-phone" placeholder="เช่น 0812345678" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-gray-600 mb-1 block font-medium">สังกัดวัด / หน่วยงาน <span class="text-red-500">*</span></label>
+                    <input type="text" id="walkin-temple" placeholder="เช่น วัดอรุณราชวราราม" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-4 mt-10">
+                <button onclick="closeWalkInModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xl font-medium py-3 px-8 rounded-full transition">
+                    ยกเลิก
+                </button>
+                <button onclick="saveWalkIn()" class="bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold py-3 px-10 rounded-full shadow-md transition transform hover:-translate-y-1">
+                    💾 บันทึกรายชื่อ
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- ========================================== -->
     <!-- OVERLAY 1: PROFILE DETAILS VIEW (คลิกดูรายชื่อเฉยๆ) -->
@@ -310,30 +375,39 @@
         
         let currentWifiCounter = 1; 
         let chartInstance = null;
-        let currentPhotoPersonId = null; // เก็บไอดีของคนที่กำลังเปิดอยู่บนหน้าจอ Photo View
+        let currentPhotoPersonId = null; 
+        let isSortedByVassaDesc = false;
 
         const firstNames = ["กิตติ", "วิชาญ", "ประเสริฐ", "สมศักดิ์", "วิชัย", "สมชาย", "มานพ", "อำนวย", "สุชาติ", "สมเกียรติ", "ณรงค์", "ธวัชชัย", "สมบูรณ์", "พรชัย", "เจริญ"];
         const lastNames = ["รักสงบ", "สิริจนฺโท", "ธมฺมทินฺโน", "ชุติมนฺโต", "ฐิตธมฺโม", "เตชวโร", "สุสิริ", "ปสาทิโก", "โชติโก", "สุปญฺโญ", "ใจดี", "มีสุข", "บุญมาก", "ปญฺญาคโม"];
         const temples = ["วัดระฆัง", "วัดอรุณราชวราราม", "วัดพระเชตุพน", "วัดสระเกศ", "วัดบวรนิเวศ", "วัดเบญจมบพิตร", "วัดสุทัศน์", "วัดมหาธาตุ", "วัดปากน้ำ", "วัดไตรมิตร"];
-        const prefixes = ["พระมหา", "พระครู", "พระอธิการ", "พระสมุห์", "พระใบฎีกา", "พระ"];
+        
+        // แยกคำนำหน้าพระ และ ฆราวาส
+        const monkPrefixes = ["พระมหา", "พระครู", "พระอธิการ", "พระสมุห์", "พระใบฎีกา", "พระ"];
+        const layPrefixes = ["นาย", "นาง", "นางสาว", "ดร.", "ผศ."];
+        const allPrefixes = [...monkPrefixes, ...layPrefixes];
 
         let attendees = [];
         
         // Generate mock records
         for (let i = 1; i <= 50; i++) {
             let regIdNum = i.toString().padStart(3, '0');
+            let selectedPrefix = allPrefixes[Math.floor(Math.random() * allPrefixes.length)];
+            let isMonk = monkPrefixes.includes(selectedPrefix);
+
             attendees.push({
                 id: i,
                 regId: `DCI02${regIdNum}`, 
-                vassa: Math.floor(Math.random() * 30) + 1,
+                vassa: isMonk ? Math.floor(Math.random() * 30) + 1 : null,
                 phone: `08${Math.floor(Math.random() * 10000000).toString().padStart(8, '0')}`,
-                prefix: prefixes[Math.floor(Math.random() * prefixes.length)],
+                prefix: selectedPrefix,
                 firstName: firstNames[Math.floor(Math.random() * firstNames.length)],
                 lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
                 temple: temples[Math.floor(Math.random() * temples.length)],
                 day1: false, 
                 day2: false, 
-                wifi: null   
+                wifi: null,
+                isNew: false // Flag เช็คว่าเพิ่งแอดใหม่ไหม
             });
         }
 
@@ -343,25 +417,26 @@
             renderTable(attendees);
         }
 
-        let isSortedByVassaDesc = false;
-
         function toggleSortVassa() {
             isSortedByVassaDesc = !isSortedByVassaDesc;
             const icon = document.getElementById('sort-vassa-icon');
             
             if (isSortedByVassaDesc) {
-                // เรียงตามพรรษา มาก -> น้อย
-                attendees.sort((a, b) => b.vassa - a.vassa);
+                // เรียงตามพรรษา มาก -> น้อย (ฆราวาสเป็น null จะถูกปัดไปอยู่ท้ายสุด)
+                attendees.sort((a, b) => {
+                    let vA = a.vassa || 0;
+                    let vB = b.vassa || 0;
+                    return vB - vA;
+                });
                 icon.innerText = '🔼';
                 icon.title = 'เรียงกลับตามลำดับเดิม';
             } else {
                 // เรียงกลับตามลำดับเดิม (อิงจาก ID)
-                attendees.sort((a, b) => a.id - b.id);
+                attendees.sort((a, b) => b.id - a.id); // ให้คนเพิ่งแอดใหม่อยู่บนสุดเสมอ
                 icon.innerText = '🔽';
                 icon.title = 'เรียงตามพรรษา (มากไปน้อย)';
             }
             
-            // รีเฟรชตารางใหม่ (โดยยังคงผลการค้นหาในช่องค้นหาไว้)
             handleSearch();
         }
 
@@ -396,21 +471,28 @@
                 noResults.classList.remove('hidden');
             } else {
                 noResults.classList.add('hidden');
-                dataList.forEach((person) => {
+                dataList.forEach((person, index) => {
                     const row = document.createElement('tr');
                     
-                    // กดที่แถบเพื่อเปิด Profile (ดูข้อมูลเฉยๆ)
                     row.className = "hover:bg-orange-50 transition-colors cursor-pointer";
+                    // ไฮไลต์รายชื่อที่เพิ่งลงทะเบียนเพิ่ม (ให้เป็นสีฟ้าอ่อนๆ)
+                    if (person.isNew) {
+                        row.classList.add("bg-blue-50");
+                    }
+
                     row.onclick = () => openProfileView(person.id);
                     
                     const fullName = `${person.prefix} ${person.firstName} ${person.lastName}`;
                     const wifiDisplay = person.wifi ? `<span class="bg-gray-800 text-yellow-400 font-mono px-2 py-1 rounded text-sm">${person.wifi}</span>` : `<span class="text-gray-400">-</span>`;
+                    
+                    const vassaText = person.vassa ? person.vassa : '-';
 
+                    // แสดงลำดับ อิงจาก index ที่ถูกส่งเข้ามาจากการค้นหาหรือการจัดเรียง
                     row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${person.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-orange-700">${person.regId}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${fullName}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">${person.vassa}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600 font-semibold">${vassaText}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">${person.phone}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${person.temple}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -446,6 +528,96 @@
             });
             renderTable(filteredData);
         }
+
+        // ==========================================
+        // WALK-IN REGISTRATION LOGIC
+        // ==========================================
+        function openWalkInModal() {
+            // เคลียร์ค่าในฟอร์ม
+            document.getElementById('walkin-prefix').value = '';
+            document.getElementById('walkin-firstname').value = '';
+            document.getElementById('walkin-lastname').value = '';
+            document.getElementById('walkin-vassa').value = '';
+            document.getElementById('walkin-phone').value = '';
+            document.getElementById('walkin-temple').value = '';
+            
+            // หาเลขรหัสประจำตัวที่มากที่สุดในระบบตอนนี้เพื่อรันเลขต่อไป
+            let maxNum = 0;
+            let currentPrefix = "DCI02"; // ค่าเริ่มต้น
+            
+            attendees.forEach(p => {
+                // ค้นหาตัวเลขต่อท้ายรหัส (เช่น DCI02050 -> เอา 050 มาเช็ค)
+                const match = p.regId.match(/^(.*?)(\d+)$/);
+                if (match) {
+                    const num = parseInt(match[2], 10);
+                    if (num > maxNum) {
+                        maxNum = num;
+                        currentPrefix = match[1]; // จำตัวหนังสือด้านหน้าไว้ (เช่น DCI02)
+                    }
+                }
+            });
+
+            // สร้างรหัสใหม่ต่อจากอันล่าสุด
+            let nextNumStr = (maxNum + 1).toString().padStart(3, '0');
+            document.getElementById('walkin-regId').value = `${currentPrefix}${nextNumStr}`;
+
+            document.getElementById('walkin-overlay').classList.remove('hidden-view');
+        }
+
+        function closeWalkInModal() {
+            document.getElementById('walkin-overlay').classList.add('hidden-view');
+        }
+
+        function saveWalkIn() {
+            const regId = document.getElementById('walkin-regId').value.trim();
+            const prefix = document.getElementById('walkin-prefix').value.trim();
+            const firstName = document.getElementById('walkin-firstname').value.trim();
+            const lastName = document.getElementById('walkin-lastname').value.trim();
+            const vassaVal = document.getElementById('walkin-vassa').value.trim();
+            const phone = document.getElementById('walkin-phone').value.trim();
+            const temple = document.getElementById('walkin-temple').value.trim();
+
+            // ตรวจสอบข้อมูลจำเป็น
+            if (!firstName || !temple) {
+                alert("กรุณากรอก ชื่อ และ สังกัดวัด/หน่วยงาน ให้ครบถ้วนครับ");
+                return;
+            }
+
+            // จัดการเรื่องพรรษา ถ้าไม่กรอกให้เป็น null
+            let vassaNum = vassaVal ? parseInt(vassaVal, 10) : null;
+
+            // สร้าง Object คนใหม่ (ให้ id เป็นค่ามากสุด + 1 เสมอ)
+            const newId = attendees.length > 0 ? Math.max(...attendees.map(p => p.id)) + 1 : 1;
+            
+            const newPerson = {
+                id: newId,
+                regId: regId || `WALK-000`, 
+                vassa: vassaNum,
+                phone: phone || "-",
+                prefix: prefix,
+                firstName: firstName,
+                lastName: lastName,
+                temple: temple,
+                day1: false, 
+                day2: false, 
+                wifi: null,
+                isNew: true // ใส่ Flag ว่าคนนี้เพิ่งเพิ่ม จะได้มีไฮไลต์สีฟ้า
+            };
+
+            // ดันข้อมูลใหม่ไปไว้บนสุดของ Array (ตำแหน่งที่ 0)
+            attendees.unshift(newPerson);
+
+            // ล้างช่องค้นหาเพื่อให้เห็นรายชื่อใหม่ชัดเจน
+            document.getElementById('searchInput').value = '';
+            
+            // ปิดหน้าต่าง และ รีเฟรชตาราง
+            closeWalkInModal();
+            handleSearch();
+            
+            // เลื่อนตารางขึ้นบนสุด
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
 
         // Handle Checkbox Toggle logic (Registration & WiFi generation)
         function handleRegistration(personId, dayNumber, isChecked) {
@@ -490,7 +662,7 @@
 
             document.getElementById('profile-reg-id').innerText = person.regId;
             document.getElementById('profile-name').innerText = `${person.prefix} ${person.firstName} ${person.lastName}`;
-            document.getElementById('profile-temple').innerText = person.temple; // ไม่มีคำว่า วัด:
+            document.getElementById('profile-temple').innerText = person.temple;
 
             document.getElementById('profile-overlay').classList.remove('hidden-view');
         }
@@ -504,20 +676,19 @@
         // OVERLAY 2: PHOTO VIEW (เช็คอินสำเร็จ) + แก้ไขข้อมูล
         // ==========================================
         function openPhotoView(person) {
-            currentPhotoPersonId = person.id; // จำไว้ว่ากำลังแก้ไขของคนไหน
+            currentPhotoPersonId = person.id; 
 
             document.getElementById('photo-reg-id').innerText = person.regId;
             document.getElementById('photo-name').innerText = `${person.prefix} ${person.firstName}  ${person.lastName}`;
             
-            // เอาคำว่า "วัด:" ออก เหลือแค่ชื่อวัดและพรรษา
-            document.getElementById('photo-temple').innerText = `${person.temple} (พรรษา ${person.vassa})`;
+            // ซ่อนคำว่าพรรษาถ้าเป็นฆราวาส (vassa = null)
+            let templeDisplay = person.vassa ? `${person.temple} (พรรษา ${person.vassa})` : person.temple;
+            document.getElementById('photo-temple').innerText = templeDisplay;
             
             document.getElementById('photo-wifi-user').innerText = person.wifi || 'N/A';
             document.getElementById('photo-wifi-pass').innerText = person.wifi || 'N/A';
 
-            // โหลดมาตอนแรกให้เป็นโหมดแสดงผล (View Mode) เสมอ
             togglePhotoEditMode(false);
-
             document.getElementById('photo-overlay').classList.remove('hidden-view');
         }
 
@@ -526,7 +697,6 @@
             const editMode = document.getElementById('photo-edit-mode');
 
             if (isEdit) {
-                // ดึงข้อมูลล่าสุดมาใส่ในช่องกรอก
                 const person = attendees.find(p => p.id === currentPhotoPersonId);
                 document.getElementById('photo-edit-prefix').value = person.prefix;
                 document.getElementById('photo-edit-firstname').value = person.firstName;
@@ -545,17 +715,17 @@
             const person = attendees.find(p => p.id === currentPhotoPersonId);
             if (!person) return;
 
-            // นำค่าที่กรอกมาอัปเดตข้อมูลในระบบ
             person.prefix = document.getElementById('photo-edit-prefix').value.trim();
             person.firstName = document.getElementById('photo-edit-firstname').value.trim();
             person.lastName = document.getElementById('photo-edit-lastname').value.trim();
             person.temple = document.getElementById('photo-edit-temple').value.trim();
 
-            // อัปเดตการแสดงผลในหน้า Photo View ทันที
             document.getElementById('photo-name').innerText = `${person.prefix} ${person.firstName}  ${person.lastName}`;
-            document.getElementById('photo-temple').innerText = `${person.temple} (พรรษา ${person.vassa})`;
+            
+            // อัปเดตหน้าจอถ่ายรูปใหม่หลังบันทึก
+            let templeDisplay = person.vassa ? `${person.temple} (พรรษา ${person.vassa})` : person.temple;
+            document.getElementById('photo-temple').innerText = templeDisplay;
 
-            // ปิดฟอร์มแก้ไข แล้วรีเฟรชตารางด้านหลัง
             togglePhotoEditMode(false);
             handleSearch();
         }
@@ -645,18 +815,23 @@
             
             csvContent += "ลำดับ,รหัสลงทะเบียน,คำนำหน้า/ฉายา,ชื่อ,นามสกุล,พรรษา,เบอร์โทรศัพท์,สังกัดวัด,มาวันที่ 1,มาวันที่ 2,รหัส WiFi\n";
 
+            // สลับข้อมูลให้เรียงตาม ID หรือลำดับเดิมที่แท้จริงก่อนพิมพ์ออก (อิงจากผู้ลงทะเบียนใหม่สุดอยู่บนหรือล่างก็ได้)
+            // ในที่นี้เราจะ print ตามที่เห็นในจอ หรือจะตามเลข ID ก็ได้
+            
             attendees.forEach((row, index) => {
                 let d1 = row.day1 ? 'มา' : 'ไม่มา';
                 let d2 = row.day2 ? 'มา' : 'ไม่มา';
                 let wifi = row.wifi || '-';
                 
+                let vassaOut = row.vassa ? row.vassa : '-';
+
                 let rowArray = [
                     index + 1, 
                     row.regId,
                     row.prefix, 
                     row.firstName, 
                     row.lastName, 
-                    row.vassa,
+                    vassaOut,
                     row.phone,
                     row.temple, 
                     d1, 
