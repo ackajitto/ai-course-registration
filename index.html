@@ -86,12 +86,16 @@
                             <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">ลำดับ</th>
                             <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">รหัสประจำตัว</th>
                             <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider whitespace-nowrap">ฉายา/ชื่อ-สกุล</th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSortVassa()" title="คลิกเพื่อเรียงตามพรรษา">
-                                พรรษา <span id="sort-vassa-icon" class="ml-1 text-orange-500 text-base">🔽</span>
+                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('vassa')" title="คลิกเพื่อเรียงตามพรรษา">
+                                พรรษา <span id="sort-vassa-icon" class="ml-1 text-orange-500 text-base opacity-50">🔽</span>
                             </th>
                             <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">เบอร์โทรศัพท์</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">สังกัดวัด</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">จังหวัด</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('temple')" title="คลิกเพื่อเรียงตามสังกัดวัด">
+                                สังกัดวัด <span id="sort-temple-icon" class="ml-1 text-orange-500 text-base opacity-50">🔽</span>
+                            </th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('province')" title="คลิกเพื่อเรียงตามจังหวัด">
+                                จังหวัด <span id="sort-province-icon" class="ml-1 text-orange-500 text-base opacity-50">🔽</span>
+                            </th>
                             <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">มาวันที่ 1</th>
                             <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">มาวันที่ 2</th>
                             <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">รหัส WiFi</th>
@@ -347,7 +351,11 @@
         let attendees = [];
         let chartInstance = null;
         let currentPhotoPersonId = null; 
-        let isSortedByVassaDesc = false;
+        
+        // Sorting State
+        let currentSortColumn = 'id'; // ค่าเริ่มต้นคือ id
+        let currentSortOrder = 'desc'; // asc หรือ desc
+        
         window.currentSummaryFilter = 'all'; // เก็บค่าว่าตอนนี้ตารางสรุปผลแสดงข้อมูลโหมดไหนอยู่
 
         // Initialize Auth
@@ -441,20 +449,54 @@
                 p.phone.includes(q)
             );
 
-            if (isSortedByVassaDesc) {
-                filtered.sort((a, b) => (b.vassa || 0) - (a.vassa || 0));
-            } else {
-                // Default sort by string ID (Timestamp) descending (newest on top)
-                filtered.sort((a, b) => String(b.id).localeCompare(String(a.id)));
-            }
+            // กระบวนการจัดเรียงข้อมูล
+            filtered.sort((a, b) => {
+                if (currentSortColumn === 'vassa') {
+                    let vA = a.vassa || 0;
+                    let vB = b.vassa || 0;
+                    return currentSortOrder === 'desc' ? vB - vA : vA - vB;
+                } else if (currentSortColumn === 'temple') {
+                    let tA = a.temple || "";
+                    let tB = b.temple || "";
+                    return currentSortOrder === 'desc' ? tB.localeCompare(tA, 'th') : tA.localeCompare(tB, 'th');
+                } else if (currentSortColumn === 'province') {
+                    let pA = a.province || "";
+                    let pB = b.province || "";
+                    return currentSortOrder === 'desc' ? pB.localeCompare(pA, 'th') : pA.localeCompare(pB, 'th');
+                } else {
+                    // ค่าเริ่มต้นคือจัดเรียงตาม ID ที่ถูกสร้างขึ้น (ให้คนมาใหม่สุดอยู่บนสุด)
+                    return currentSortOrder === 'desc' ? String(b.id).localeCompare(String(a.id)) : String(a.id).localeCompare(String(b.id));
+                }
+            });
 
             window.renderTable(filtered);
         }
 
-        window.toggleSortVassa = function() {
-            isSortedByVassaDesc = !isSortedByVassaDesc;
-            const icon = document.getElementById('sort-vassa-icon');
-            icon.innerText = isSortedByVassaDesc ? '🔼' : '🔽';
+        window.toggleSort = function(column) {
+            if (currentSortColumn === column) {
+                // หากกดซ้ำที่คอลัมน์เดิม ให้สลับการเรียง มากไปน้อย <-> น้อยไปมาก
+                currentSortOrder = currentSortOrder === 'desc' ? 'asc' : 'desc';
+            } else {
+                // หากเปลี่ยนคอลัมน์ใหม่ สำหรับพรรษาจะเริ่มจากมากไปน้อย (desc) ส่วนข้อความจะเริ่มจาก ก-ฮ (asc)
+                currentSortColumn = column;
+                currentSortOrder = column === 'vassa' ? 'desc' : 'asc';
+            }
+
+            // จัดการการแสดงผลของไอคอนบนหัวตาราง
+            const cols = ['vassa', 'temple', 'province'];
+            cols.forEach(col => {
+                const iconEl = document.getElementById(`sort-${col}-icon`);
+                if (iconEl) {
+                    if (col === currentSortColumn) {
+                        iconEl.innerText = currentSortOrder === 'desc' ? '🔽' : '🔼';
+                        iconEl.classList.remove('opacity-50'); // ทำให้ไอคอนสว่างขึ้นเมื่อถูกเลือก
+                    } else {
+                        iconEl.innerText = '🔽';
+                        iconEl.classList.add('opacity-50'); // ทำให้ไอคอนจางลงเมื่อไม่ได้เลือก
+                    }
+                }
+            });
+
             window.handleSearch();
         }
 
@@ -841,7 +883,7 @@
 
         // Initial render fallback (will be overwritten by Firestore if online)
         window.onload = () => {
-            window.renderTable(attendees);
+            window.handleSearch();
         };
     </script>
 </body>
