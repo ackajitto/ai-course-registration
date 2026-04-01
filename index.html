@@ -31,8 +31,8 @@
             display: none !important;
         }
         .large-checkbox {
-            width: 1.5rem;
-            height: 1.5rem;
+            width: 1.75rem; /* ขยายขนาด checkbox ให้ใหญ่ขึ้นสมดุลกับตัวอักษร */
+            height: 1.75rem;
             cursor: pointer;
             accent-color: #f97316;
         }
@@ -45,16 +45,16 @@
 
     <!-- Navigation Bar -->
     <nav class="bg-orange-600 text-white shadow-md p-4 flex flex-wrap justify-between items-center shrink-0 z-40 gap-4">
-        <div class="text-xl md:text-2xl font-semibold flex items-center gap-3 whitespace-nowrap">
+        <div class="text-xl md:text-3xl font-semibold flex items-center gap-3 whitespace-nowrap">
             <span>📝</span> ระบบลงทะเบียน
-            <span id="sync-status" class="text-sm bg-orange-800 px-2 py-1 rounded-full text-orange-200">กำลังเชื่อมต่อฐานข้อมูล...</span>
+            <span id="sync-status" class="text-sm md:text-base bg-orange-800 px-3 py-1 rounded-full text-orange-200">กำลังเชื่อมต่อฐานข้อมูล...</span>
         </div>
         <div class="flex gap-2 md:gap-4 flex-wrap justify-end">
-            <button onclick="openWalkInModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:px-4 md:py-2 rounded transition font-medium text-sm md:text-base whitespace-nowrap shadow-md border border-blue-500">
+            <button onclick="openWalkInModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg whitespace-nowrap shadow-md border border-blue-500">
                 + เพิ่มรายชื่อ
             </button>
-            <button onclick="switchView('registration')" id="nav-reg" class="bg-orange-700 hover:bg-orange-800 px-3 py-2 md:px-4 md:py-2 rounded transition font-medium text-sm md:text-base whitespace-nowrap">หน้าลงทะเบียน</button>
-            <button onclick="switchView('dashboard')" id="nav-dash" class="hover:bg-orange-500 px-3 py-2 md:px-4 md:py-2 rounded transition font-medium text-sm md:text-base whitespace-nowrap">สรุปผล</button>
+            <button onclick="switchView('registration')" id="nav-reg" class="bg-orange-700 hover:bg-orange-800 px-3 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg whitespace-nowrap">หน้าลงทะเบียน</button>
+            <button onclick="switchView('dashboard')" id="nav-dash" class="hover:bg-orange-500 px-3 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg whitespace-nowrap">สรุปผล</button>
         </div>
     </nav>
 
@@ -64,17 +64,19 @@
         <!-- ========================================== -->
         <!-- VIEW 1: REGISTRATION & SEARCH -->
         <!-- ========================================== -->
-        <section id="view-registration" class="max-w-6xl mx-auto">
+        <!-- ขยายความกว้างสูงสุดให้เต็มจอคอมพิวเตอร์ -->
+        <section id="view-registration" class="w-full max-w-[98%] 2xl:max-w-[1600px] mx-auto">
             <div class="mb-6 md:mb-8">
-                <h1 class="text-2xl md:text-3xl font-bold text-orange-800 mb-3">ค้นหาและลงทะเบียนผู้เข้าร่วมงาน</h1>
-                <p class="text-gray-600 text-base md:text-lg leading-relaxed">พิมพ์รหัสประจำตัว ชื่อ จังหวัด หรือเบอร์โทรศัพท์ เพื่อค้นหา <br class="hidden md:block"><span class="text-sm md:text-base text-gray-500 md:mt-1 inline-block">(สามารถกดที่แถบรายชื่อเพื่อดูข้อมูลแบบเต็มหน้าจอได้)</span></p>
+                <h1 class="text-3xl md:text-4xl font-bold text-orange-800 mb-3">ค้นหาและลงทะเบียนผู้เข้าร่วมงาน</h1>
+                <p class="text-gray-600 text-lg md:text-xl leading-relaxed">พิมพ์รหัสประจำตัว ชื่อ จังหวัด หรือเบอร์โทรศัพท์ เพื่อค้นหา <br class="hidden md:block"><span class="text-base md:text-lg text-gray-500 md:mt-1 inline-block">(สามารถกดที่แถบรายชื่อเพื่อดูข้อมูลแบบเต็มหน้าจอได้)</span></p>
             </div>
 
             <!-- Search Box -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-orange-100 mb-6 flex items-center gap-3">
-                <span class="text-2xl font-canvas">🔍</span>
+            <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-orange-100 mb-6 flex items-center gap-4">
+                <span class="text-3xl font-canvas">🔍</span>
+                <!-- ขยายช่องค้นหาและตัวอักษร -->
                 <input type="text" id="searchInput" placeholder="ค้นหา รหัส, ชื่อ, วัด, จังหวัด, เบอร์โทร..." 
-                       class="w-full text-lg p-2 outline-none focus:border-b-2 focus:border-orange-500 transition-colors"
+                       class="w-full text-xl md:text-2xl p-3 outline-none focus:border-b-4 focus:border-orange-500 transition-colors"
                        onkeyup="handleSearch()">
             </div>
 
@@ -82,56 +84,57 @@
             <div class="bg-white rounded-lg shadow-sm border border-orange-100 overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-orange-50 text-orange-800">
+                        <!-- ปรับขนาดตัวอักษรหัวตารางให้ใหญ่ขึ้น (text-base md:text-lg) -->
                         <tr>
-                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">ลำดับ</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">รหัสประจำตัว</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider whitespace-nowrap">ฉายา/ชื่อ-สกุล</th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('vassa')" title="คลิกเพื่อเรียงตามพรรษา">
-                                พรรษา <span id="sort-vassa-icon" class="ml-1 text-orange-500 text-base opacity-50">🔽</span>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-left text-base md:text-lg font-semibold uppercase tracking-wider">ลำดับ</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-left text-base md:text-lg font-semibold uppercase tracking-wider">รหัสประจำตัว</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-left text-base md:text-lg font-semibold uppercase tracking-wider whitespace-nowrap">ฉายา/ชื่อ-สกุล</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-center text-base md:text-lg font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('vassa')" title="คลิกเพื่อเรียงตามพรรษา">
+                                พรรษา <span id="sort-vassa-icon" class="ml-1 text-orange-500 opacity-50">🔽</span>
                             </th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">เบอร์โทรศัพท์</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('temple')" title="คลิกเพื่อเรียงตามสังกัดวัด">
-                                สังกัดวัด <span id="sort-temple-icon" class="ml-1 text-orange-500 text-base opacity-50">🔽</span>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-center text-base md:text-lg font-semibold uppercase tracking-wider">เบอร์โทรศัพท์</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-left text-base md:text-lg font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('temple')" title="คลิกเพื่อเรียงตามสังกัดวัด">
+                                สังกัดวัด <span id="sort-temple-icon" class="ml-1 text-orange-500 opacity-50">🔽</span>
                             </th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('province')" title="คลิกเพื่อเรียงตามจังหวัด">
-                                จังหวัด <span id="sort-province-icon" class="ml-1 text-orange-500 text-base opacity-50">🔽</span>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-left text-base md:text-lg font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('province')" title="คลิกเพื่อเรียงตามจังหวัด">
+                                จังหวัด <span id="sort-province-icon" class="ml-1 text-orange-500 opacity-50">🔽</span>
                             </th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">มาวันที่ 1</th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">มาวันที่ 2</th>
-                            <th class="px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider">รหัส WiFi</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-center text-base md:text-lg font-semibold uppercase tracking-wider">มาวันที่ 1</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-center text-base md:text-lg font-semibold uppercase tracking-wider">มาวันที่ 2</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-center text-base md:text-lg font-semibold uppercase tracking-wider">รหัส WiFi</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
                         <!-- Rows populated by JS -->
                     </tbody>
                 </table>
-                <div id="noResultsMsg" class="hidden text-center py-8 text-gray-500">ไม่พบข้อมูลที่ค้นหา หรือระบบยังไม่มีข้อมูล (กรุณานำเข้า CSV)</div>
+                <div id="noResultsMsg" class="hidden text-center py-10 text-xl text-gray-500">ไม่พบข้อมูลที่ค้นหา หรือระบบยังไม่มีข้อมูล (กรุณานำเข้า CSV)</div>
             </div>
         </section>
 
         <!-- ========================================== -->
         <!-- VIEW 2: DASHBOARD & SUMMARY -->
         <!-- ========================================== -->
-        <section id="view-dashboard" class="max-w-6xl mx-auto hidden-view mt-2">
+        <section id="view-dashboard" class="w-full max-w-[98%] 2xl:max-w-[1600px] mx-auto hidden-view mt-2">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-orange-800 mb-2">สรุปผลการลงทะเบียน</h1>
-                    <p class="text-gray-600">สถิติและข้อมูลผู้เข้าร่วมเพื่อการทำรายงาน</p>
+                    <h1 class="text-3xl md:text-4xl font-bold text-orange-800 mb-2">สรุปผลการลงทะเบียน</h1>
+                    <p class="text-gray-600 text-lg">สถิติและข้อมูลผู้เข้าร่วมเพื่อการทำรายงาน</p>
                 </div>
-                <div class="flex flex-wrap gap-2 items-center">
+                <div class="flex flex-wrap gap-3 items-center">
                     <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="importCSV(event)">
                     <!-- ปุ่มจำลองข้อมูลสำหรับทดสอบระบบ -->
-                    <button onclick="generateMockData()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg shadow-md font-medium text-sm transition mr-4" title="สร้างรายชื่อตัวอย่างเพื่อทดสอบ">
+                    <button onclick="generateMockData()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg shadow-md font-medium text-base transition mr-4" title="สร้างรายชื่อตัวอย่างเพื่อทดสอบ">
                         🛠️ ทดสอบ 50 รายชื่อ
                     </button>
 
-                    <button onclick="document.getElementById('csvFileInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 md:px-6 rounded-lg shadow-md font-medium text-base md:text-lg flex items-center gap-2 transition">
+                    <button onclick="document.getElementById('csvFileInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 md:px-6 rounded-lg shadow-md font-medium text-lg flex items-center gap-2 transition">
                         <span>📤</span> เพิ่มข้อมูล (CSV)
                     </button>
-                    <button onclick="exportCSV()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-3 md:px-6 rounded-lg shadow-md font-medium text-base md:text-lg flex items-center gap-2 transition">
+                    <button onclick="exportCSV()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-3 md:px-6 rounded-lg shadow-md font-medium text-lg flex items-center gap-2 transition">
                         <span>📥</span> ดึงข้อมูล (CSV ทั้งหมด)
                     </button>
-                    <button onclick="resetData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-3 md:px-6 rounded-lg shadow-md font-medium text-base md:text-lg flex items-center gap-2 transition">
+                    <button onclick="resetData()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-3 md:px-6 rounded-lg shadow-md font-medium text-lg flex items-center gap-2 transition">
                         <span>🗑️</span> ล้างข้อมูล
                     </button>
                 </div>
@@ -140,52 +143,52 @@
             <!-- Stats Grid (Clickable) -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <!-- Total -->
-                <div onclick="filterSummary('all')" class="bg-white rounded-xl shadow border-l-4 border-blue-500 p-6 cursor-pointer hover:bg-blue-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อทั้งหมด">
-                    <p class="text-gray-500 text-sm font-semibold mb-1">ยอดรวมผู้ลงทะเบียน</p>
-                    <p class="text-3xl font-bold text-gray-800" id="stat-total">0</p>
+                <div onclick="filterSummary('all')" class="bg-white rounded-xl shadow border-l-4 border-blue-500 p-6 md:p-8 cursor-pointer hover:bg-blue-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อทั้งหมด">
+                    <p class="text-gray-500 text-base md:text-lg font-semibold mb-2">ยอดรวมผู้ลงทะเบียน</p>
+                    <p class="text-4xl md:text-5xl font-bold text-gray-800" id="stat-total">0</p>
                 </div>
                 <!-- Day 1 -->
-                <div onclick="filterSummary('day1')" class="bg-white rounded-xl shadow border-l-4 border-orange-500 p-6 cursor-pointer hover:bg-orange-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อเฉพาะคนที่มาวันที่ 1">
-                    <p class="text-gray-500 text-sm font-semibold mb-1">มาวันที่ 1</p>
-                    <p class="text-3xl font-bold text-gray-800" id="stat-day1">0</p>
+                <div onclick="filterSummary('day1')" class="bg-white rounded-xl shadow border-l-4 border-orange-500 p-6 md:p-8 cursor-pointer hover:bg-orange-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อเฉพาะคนที่มาวันที่ 1">
+                    <p class="text-gray-500 text-base md:text-lg font-semibold mb-2">มาวันที่ 1</p>
+                    <p class="text-4xl md:text-5xl font-bold text-gray-800" id="stat-day1">0</p>
                 </div>
                 <!-- Day 2 -->
-                <div onclick="filterSummary('day2')" class="bg-white rounded-xl shadow border-l-4 border-green-500 p-6 cursor-pointer hover:bg-green-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อเฉพาะคนที่มาวันที่ 2">
-                    <p class="text-gray-500 text-sm font-semibold mb-1">มาวันที่ 2</p>
-                    <p class="text-3xl font-bold text-gray-800" id="stat-day2">0</p>
+                <div onclick="filterSummary('day2')" class="bg-white rounded-xl shadow border-l-4 border-green-500 p-6 md:p-8 cursor-pointer hover:bg-green-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อเฉพาะคนที่มาวันที่ 2">
+                    <p class="text-gray-500 text-base md:text-lg font-semibold mb-2">มาวันที่ 2</p>
+                    <p class="text-4xl md:text-5xl font-bold text-gray-800" id="stat-day2">0</p>
                 </div>
                 <!-- Both Days -->
-                <div onclick="filterSummary('both')" class="bg-white rounded-xl shadow border-l-4 border-purple-500 p-6 cursor-pointer hover:bg-purple-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อเฉพาะคนที่มาครบ 2 วัน">
-                    <p class="text-gray-500 text-sm font-semibold mb-1">มาทั้ง 2 วัน</p>
-                    <p class="text-3xl font-bold text-purple-700 drop-shadow-sm" id="stat-both">0</p>
+                <div onclick="filterSummary('both')" class="bg-white rounded-xl shadow border-l-4 border-purple-500 p-6 md:p-8 cursor-pointer hover:bg-purple-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อเฉพาะคนที่มาครบ 2 วัน">
+                    <p class="text-gray-500 text-base md:text-lg font-semibold mb-2">มาทั้ง 2 วัน</p>
+                    <p class="text-4xl md:text-5xl font-bold text-purple-700 drop-shadow-sm" id="stat-both">0</p>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4 text-center">สัดส่วนการเข้าร่วมแต่ละวัน</h3>
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 mb-8">
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-700 mb-6 text-center">สัดส่วนการเข้าร่วมแต่ละวัน</h3>
                 <div class="chart-container"><canvas id="attendanceChart"></canvas></div>
             </div>
             
-            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-                    <h3 class="text-lg font-semibold text-gray-700 flex items-center">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 md:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h3 class="text-xl md:text-2xl font-semibold text-gray-700 flex items-center">
                         รายชื่อผู้เข้าร่วม 
-                        <span id="summary-filter-label" class="text-blue-600 bg-blue-50 px-2 py-1 rounded ml-3 font-normal text-sm border border-blue-200">(ทั้งหมด)</span>
+                        <span id="summary-filter-label" class="text-blue-600 bg-blue-50 px-3 py-1 rounded-lg ml-4 font-normal text-base md:text-lg border border-blue-200">(ทั้งหมด)</span>
                     </h3>
-                    <button onclick="exportFilteredCSV()" class="bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 shadow-sm">
+                    <button onclick="exportFilteredCSV()" class="bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300 px-5 py-3 rounded-lg text-base md:text-lg font-semibold transition flex items-center gap-2 shadow-sm">
                         <span>⬇️</span> โหลด Excel เฉพาะกลุ่มนี้
                     </button>
                 </div>
-                <div class="overflow-x-auto h-64 overflow-y-auto text-sm">
+                <div class="overflow-x-auto h-96 overflow-y-auto">
                     <table class="min-w-full">
                         <thead class="bg-gray-50 sticky top-0">
                             <tr>
-                                <th class="p-2 text-left">รหัสประจำตัว</th>
-                                <th class="p-2 text-left">ชื่อ-สกุล</th>
-                                <th class="p-2 text-left">จังหวัด</th>
-                                <th class="p-2 text-center">วัน 1</th>
-                                <th class="p-2 text-center">วัน 2</th>
-                                <th class="p-2 text-center">WiFi</th>
+                                <th class="p-3 md:p-4 text-left text-base md:text-lg font-semibold text-gray-700">รหัสประจำตัว</th>
+                                <th class="p-3 md:p-4 text-left text-base md:text-lg font-semibold text-gray-700">ชื่อ-สกุล</th>
+                                <th class="p-3 md:p-4 text-left text-base md:text-lg font-semibold text-gray-700">จังหวัด</th>
+                                <th class="p-3 md:p-4 text-center text-base md:text-lg font-semibold text-gray-700">วัน 1</th>
+                                <th class="p-3 md:p-4 text-center text-base md:text-lg font-semibold text-gray-700">วัน 2</th>
+                                <th class="p-3 md:p-4 text-center text-base md:text-lg font-semibold text-gray-700">WiFi</th>
                             </tr>
                         </thead>
                         <tbody id="summaryTableBody" class="divide-y divide-gray-100"></tbody>
@@ -199,45 +202,45 @@
     <!-- OVERLAY 0: WALK-IN (เพิ่มรายชื่อ) -->
     <!-- ========================================== -->
     <div id="walkin-overlay" class="fixed inset-0 bg-black/50 z-50 hidden-view flex flex-col justify-center items-center p-4 overflow-y-auto">
-        <div class="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl w-full max-w-3xl relative border-t-8 border-blue-500">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">➕ เพิ่มรายชื่อผู้เข้าร่วมงาน</h2>
-            <div class="flex flex-col gap-5">
+        <div class="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl w-full max-w-4xl relative border-t-8 border-blue-500">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8">➕ เพิ่มรายชื่อผู้เข้าร่วมงาน</h2>
+            <div class="flex flex-col gap-6">
                 <div>
-                    <label class="text-gray-600 mb-1 block font-medium">รหัสประจำตัว (รันให้อัตโนมัติ)</label>
-                    <input type="text" id="walkin-regId" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none bg-blue-50 font-bold text-blue-800">
+                    <label class="text-gray-600 mb-2 block text-lg font-medium">รหัสประจำตัว (รันให้อัตโนมัติ)</label>
+                    <input type="text" id="walkin-regId" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none bg-blue-50 font-bold text-blue-800">
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label class="text-gray-600 mb-1 block font-medium">คำนำหน้า/ฉายา</label>
-                        <input type="text" id="walkin-prefix" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                        <label class="text-gray-600 mb-2 block text-lg font-medium">คำนำหน้า/ฉายา</label>
+                        <input type="text" id="walkin-prefix" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none">
                     </div>
                     <div>
-                        <label class="text-gray-600 mb-1 block font-medium">ชื่อ <span class="text-red-500">*</span></label>
-                        <input type="text" id="walkin-firstname" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                        <label class="text-gray-600 mb-2 block text-lg font-medium">ชื่อ <span class="text-red-500">*</span></label>
+                        <input type="text" id="walkin-firstname" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none">
                     </div>
                     <div>
-                        <label class="text-gray-600 mb-1 block font-medium">นามสกุล</label>
-                        <input type="text" id="walkin-lastname" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label class="text-gray-600 mb-1 block font-medium">อายุพรรษา (เว้นได้หากเป็นฆราวาส)</label>
-                        <input type="number" id="walkin-vassa" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="text-gray-600 mb-1 block font-medium">เบอร์โทรศัพท์</label>
-                        <input type="text" id="walkin-phone" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none">
+                        <label class="text-gray-600 mb-2 block text-lg font-medium">นามสกุล</label>
+                        <input type="text" id="walkin-lastname" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none">
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div><label class="text-gray-600 mb-1 block font-medium">สังกัดวัด / หน่วยงาน <span class="text-red-500">*</span></label><input type="text" id="walkin-temple" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none"></div>
-                    <div><label class="text-gray-600 mb-1 block font-medium">จังหวัด <span class="text-red-500">*</span></label><input type="text" id="walkin-province" class="border-2 border-gray-200 rounded-xl p-3 text-xl w-full focus:border-blue-500 outline-none"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-gray-600 mb-2 block text-lg font-medium">อายุพรรษา (เว้นได้หากเป็นฆราวาส)</label>
+                        <input type="number" id="walkin-vassa" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-gray-600 mb-2 block text-lg font-medium">เบอร์โทรศัพท์</label>
+                        <input type="text" id="walkin-phone" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="text-gray-600 mb-2 block text-lg font-medium">สังกัดวัด / หน่วยงาน <span class="text-red-500">*</span></label><input type="text" id="walkin-temple" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none"></div>
+                    <div><label class="text-gray-600 mb-2 block text-lg font-medium">จังหวัด <span class="text-red-500">*</span></label><input type="text" id="walkin-province" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none"></div>
                 </div>
             </div>
-            <div class="flex justify-end gap-4 mt-10">
-                <button onclick="closeWalkInModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xl font-medium py-3 px-8 rounded-full transition">ยกเลิก</button>
-                <button onclick="saveWalkIn()" class="bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold py-3 px-10 rounded-full shadow-md transition transform hover:-translate-y-1">💾 บันทึกรายชื่อ</button>
+            <div class="flex justify-end gap-5 mt-12">
+                <button onclick="closeWalkInModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-2xl font-medium py-3 px-10 rounded-full transition">ยกเลิก</button>
+                <button onclick="saveWalkIn()" class="bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold py-3 px-12 rounded-full shadow-md transition transform hover:-translate-y-1">💾 บันทึกรายชื่อ</button>
             </div>
         </div>
     </div>
@@ -251,8 +254,8 @@
             <button onclick="closeProfileView()" class="absolute top-4 right-4 md:top-8 md:right-8 bg-gray-200 hover:bg-red-100 hover:text-red-600 text-gray-600 rounded-full w-12 h-12 md:w-16 md:h-16 flex items-center justify-center text-2xl md:text-3xl transition-colors duration-300 shadow-sm">✕</button>
             
             <div class="bg-orange-100 inline-block px-6 md:px-10 py-3 rounded-2xl border-2 border-orange-300 mb-8 md:mb-10 mt-4 shadow-inner">
-                <span class="text-2xl md:text-3xl text-orange-800 mr-3 font-normal">รหัสประจำตัว:</span>
-                <span id="profile-reg-id" class="text-4xl md:text-6xl font-bold text-orange-600 tracking-widest"></span>
+                <span class="text-2xl md:text-4xl text-orange-800 mr-3 font-normal">รหัสประจำตัว:</span>
+                <span id="profile-reg-id" class="text-4xl md:text-7xl font-bold text-orange-600 tracking-widest"></span>
             </div>
             
             <!-- ใช้ clamp() เพื่อปรับลดขนาดตัวอักษรอัตโนมัติ ป้องกันการขึ้นบรรทัดใหม่ -->
@@ -269,47 +272,47 @@
     <!-- ========================================== -->
     <div id="photo-overlay" class="fixed inset-0 bg-white z-50 flex flex-col justify-center items-center hidden-view p-4 md:p-8 overflow-x-hidden overflow-y-auto">
         <div class="w-full max-w-[95vw] xl:max-w-6xl 2xl:max-w-[1200px] text-center flex flex-col gap-8 md:gap-10">
-            <div class="text-green-600 text-2xl md:text-3xl font-bold mb-2 md:mb-4 flex items-center justify-center gap-2"><span>✅</span> ยืนยันการลงทะเบียนสำเร็จ</div>
+            <div class="text-green-600 text-2xl md:text-4xl font-bold mb-2 md:mb-4 flex items-center justify-center gap-2"><span>✅</span> ยืนยันการลงทะเบียนสำเร็จ</div>
             
             <div id="photo-view-mode" class="flex flex-col gap-8 md:gap-10">
-                <div class="bg-orange-50 border-4 border-orange-200 rounded-3xl p-6 md:p-10 shadow-lg relative mt-6">
-                    <div class="absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 bg-orange-600 text-white px-6 md:px-10 py-2 md:py-3 rounded-full shadow-md border-4 border-white tracking-wider flex items-center gap-3 w-max">
-                        <span class="text-lg md:text-xl font-normal text-orange-200">รหัสประจำตัว:</span>
-                        <span id="photo-reg-id" class="font-bold text-2xl md:text-4xl text-white"></span>
+                <div class="bg-orange-50 border-4 border-orange-200 rounded-3xl p-6 md:p-12 shadow-lg relative mt-6">
+                    <div class="absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 bg-orange-600 text-white px-6 md:px-12 py-2 md:py-4 rounded-full shadow-md border-4 border-white tracking-wider flex items-center gap-3 w-max">
+                        <span class="text-lg md:text-2xl font-normal text-orange-200">รหัสประจำตัว:</span>
+                        <span id="photo-reg-id" class="font-bold text-2xl md:text-5xl text-white"></span>
                     </div>
                     
                     <!-- ใช้ clamp() เพื่อปรับลดขนาดตัวอักษรอัตโนมัติ ป้องกันการขึ้นบรรทัดใหม่ -->
-                    <h2 id="photo-name" class="name-display w-full overflow-hidden text-ellipsis text-[clamp(1.5rem,4.5vw,5rem)] font-bold text-gray-800 mb-4 md:mb-6 leading-tight mt-8"></h2>
+                    <h2 id="photo-name" class="name-display w-full overflow-hidden text-ellipsis text-[clamp(1.5rem,4.5vw,5rem)] font-bold text-gray-800 mb-4 md:mb-8 leading-tight mt-10"></h2>
                     
-                    <h3 id="photo-temple" class="text-2xl md:text-4xl text-orange-700 font-medium mb-2"></h3>
-                    <h4 id="photo-province" class="text-xl md:text-3xl text-gray-500 mb-6 md:mb-8"></h4>
-                    <button onclick="togglePhotoEditMode(true)" class="bg-white hover:bg-orange-100 text-orange-700 text-lg md:text-xl font-medium py-2 px-6 rounded-full transition shadow-sm border border-orange-200 inline-flex items-center gap-2"><span>✏️</span> แก้ไขข้อมูล</button>
+                    <h3 id="photo-temple" class="text-2xl md:text-5xl text-orange-700 font-medium mb-3"></h3>
+                    <h4 id="photo-province" class="text-xl md:text-4xl text-gray-500 mb-6 md:mb-10"></h4>
+                    <button onclick="togglePhotoEditMode(true)" class="bg-white hover:bg-orange-100 text-orange-700 text-lg md:text-2xl font-medium py-3 px-8 rounded-full transition shadow-sm border border-orange-200 inline-flex items-center gap-2"><span>✏️</span> แก้ไขข้อมูล</button>
                 </div>
                 
-                <div class="bg-gray-800 text-white rounded-3xl p-6 md:p-8 shadow-xl border-4 border-gray-600 inline-block mx-auto min-w-[300px] md:min-w-[500px]">
-                    <p class="text-xl md:text-2xl text-gray-300 mb-2 font-light">รหัสผ่านอินเทอร์เน็ต (WiFi)</p>
-                    <div class="flex flex-col items-center justify-center gap-4 mt-4">
-                        <div class="flex items-center gap-4 text-3xl md:text-5xl font-bold"><span class="text-gray-400 text-xl md:text-2xl font-normal w-20 md:w-24 text-right">User:</span><span id="photo-wifi-user" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-4 md:px-6 py-2 rounded-lg border border-gray-700"></span></div>
-                        <div class="flex items-center gap-4 text-3xl md:text-5xl font-bold"><span class="text-gray-400 text-xl md:text-2xl font-normal w-20 md:w-24 text-right">Pass:</span><span id="photo-wifi-pass" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-4 md:px-6 py-2 rounded-lg border border-gray-700"></span></div>
+                <div class="bg-gray-800 text-white rounded-3xl p-6 md:p-10 shadow-xl border-4 border-gray-600 inline-block mx-auto min-w-[300px] md:min-w-[600px]">
+                    <p class="text-xl md:text-3xl text-gray-300 mb-4 font-light">รหัสผ่านอินเทอร์เน็ต (WiFi)</p>
+                    <div class="flex flex-col items-center justify-center gap-5 mt-4">
+                        <div class="flex items-center gap-4 text-3xl md:text-6xl font-bold"><span class="text-gray-400 text-xl md:text-3xl font-normal w-20 md:w-32 text-right">User:</span><span id="photo-wifi-user" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-4 md:px-8 py-3 rounded-lg border border-gray-700"></span></div>
+                        <div class="flex items-center gap-4 text-3xl md:text-6xl font-bold"><span class="text-gray-400 text-xl md:text-3xl font-normal w-20 md:w-32 text-right">Pass:</span><span id="photo-wifi-pass" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-4 md:px-8 py-3 rounded-lg border border-gray-700"></span></div>
                     </div>
                 </div>
-                <div><button onclick="closePhotoView()" class="bg-red-500 hover:bg-red-600 text-white text-xl md:text-2xl font-bold py-3 md:py-4 px-10 md:px-12 rounded-full shadow-lg transition transform hover:scale-105 mt-2">ปิดหน้าต่าง</button></div>
+                <div><button onclick="closePhotoView()" class="bg-red-500 hover:bg-red-600 text-white text-xl md:text-3xl font-bold py-3 md:py-5 px-10 md:px-16 rounded-full shadow-lg transition transform hover:scale-105 mt-4">ปิดหน้าต่าง</button></div>
             </div>
 
-            <div id="photo-edit-mode" class="hidden-view bg-white p-6 md:p-10 rounded-3xl shadow-lg border-4 border-orange-200 text-left w-full mx-auto relative">
-                <h3 class="text-2xl md:text-3xl mb-6 md:mb-8 font-bold text-orange-800 text-center flex items-center justify-center gap-2"><span>✏️</span> แก้ไขข้อมูล</h3>
-                <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <div class="w-full md:w-1/4"><label class="text-gray-600 mb-2 block font-medium">คำนำหน้า</label><input type="text" id="photo-edit-prefix" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-2xl w-full focus:border-orange-500 outline-none"></div>
-                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium">ชื่อ</label><input type="text" id="photo-edit-firstname" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-2xl w-full focus:border-orange-500 outline-none"></div>
-                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium">ฉายา/นามสกุล</label><input type="text" id="photo-edit-lastname" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-2xl w-full focus:border-orange-500 outline-none"></div>
+            <div id="photo-edit-mode" class="hidden-view bg-white p-6 md:p-12 rounded-3xl shadow-lg border-4 border-orange-200 text-left w-full mx-auto relative">
+                <h3 class="text-2xl md:text-4xl mb-6 md:mb-10 font-bold text-orange-800 text-center flex items-center justify-center gap-3"><span>✏️</span> แก้ไขข้อมูล</h3>
+                <div class="flex flex-col md:flex-row gap-5 mb-8">
+                    <div class="w-full md:w-1/4"><label class="text-gray-600 mb-2 block font-medium text-lg">คำนำหน้า</label><input type="text" id="photo-edit-prefix" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-3xl w-full focus:border-orange-500 outline-none"></div>
+                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium text-lg">ชื่อ</label><input type="text" id="photo-edit-firstname" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-3xl w-full focus:border-orange-500 outline-none"></div>
+                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium text-lg">ฉายา/นามสกุล</label><input type="text" id="photo-edit-lastname" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-3xl w-full focus:border-orange-500 outline-none"></div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 md:mb-10">
-                    <div><label class="text-gray-600 mb-2 block font-medium">วัด</label><input type="text" id="photo-edit-temple" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-2xl w-full focus:border-orange-500 outline-none"></div>
-                    <div><label class="text-gray-600 mb-2 block font-medium">จังหวัด</label><input type="text" id="photo-edit-province" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-2xl w-full focus:border-orange-500 outline-none"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 md:mb-12">
+                    <div><label class="text-gray-600 mb-2 block font-medium text-lg">วัด</label><input type="text" id="photo-edit-temple" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-3xl w-full focus:border-orange-500 outline-none"></div>
+                    <div><label class="text-gray-600 mb-2 block font-medium text-lg">จังหวัด</label><input type="text" id="photo-edit-province" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-3xl w-full focus:border-orange-500 outline-none"></div>
                 </div>
-                <div class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
-                    <button onclick="savePhotoProfile()" class="bg-green-600 hover:bg-green-700 text-white text-xl md:text-2xl font-bold py-3 md:py-4 px-10 md:px-12 rounded-full shadow-lg transition">💾 บันทึกข้อมูล</button>
-                    <button onclick="togglePhotoEditMode(false)" class="bg-gray-400 hover:bg-gray-500 text-white text-xl md:text-2xl font-medium py-3 md:py-4 px-8 md:px-10 rounded-full shadow-md transition">ยกเลิก</button>
+                <div class="flex flex-col sm:flex-row justify-center gap-5 mt-6">
+                    <button onclick="savePhotoProfile()" class="bg-green-600 hover:bg-green-700 text-white text-xl md:text-3xl font-bold py-3 md:py-4 px-10 md:px-14 rounded-full shadow-lg transition">💾 บันทึกข้อมูล</button>
+                    <button onclick="togglePhotoEditMode(false)" class="bg-gray-400 hover:bg-gray-500 text-white text-xl md:text-3xl font-medium py-3 md:py-4 px-8 md:px-12 rounded-full shadow-md transition">ยกเลิก</button>
                 </div>
             </div>
         </div>
@@ -344,7 +347,7 @@
         } catch (e) {
             console.error("Firebase Error:", e);
             document.getElementById('sync-status').innerText = 'ทำงานแบบออฟไลน์';
-            document.getElementById('sync-status').className = 'text-sm bg-gray-600 px-2 py-1 rounded-full text-gray-200';
+            document.getElementById('sync-status').className = 'text-sm md:text-base bg-gray-600 px-3 py-1 rounded-full text-gray-200';
         }
 
         // Global State
@@ -375,7 +378,7 @@
                 user = currentUser;
                 if (user && attendeesRef) {
                     document.getElementById('sync-status').innerText = 'เชื่อมต่อระบบ Cloud สำเร็จ 🟢';
-                    document.getElementById('sync-status').className = 'text-sm bg-green-600 px-2 py-1 rounded-full text-white shadow-inner';
+                    document.getElementById('sync-status').className = 'text-sm md:text-base bg-green-600 px-3 py-1 rounded-full text-white shadow-inner';
                     
                     // Listen for real-time changes
                     onSnapshot(attendeesRef, (snapshot) => {
@@ -413,17 +416,18 @@
                 const row = document.createElement('tr');
                 row.className = "hover:bg-orange-50 transition-colors cursor-pointer " + (p.isNew ? "bg-blue-50" : "");
                 row.onclick = () => window.openProfileView(p.id);
+                // อัปเดตขนาดอักษรในเซลล์ตาราง (text-base md:text-lg) และเพิ่ม Padding ให้ใหญ่ขึ้น
                 row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${idx + 1}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-orange-700">${p.regId}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 name-display">${getFullName(p)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600 font-semibold">${p.vassa || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">${p.phone}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.temple}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.province}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day1 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration('${p.id}', 1, this.checked)"></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day2 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration('${p.id}', 2, this.checked)"></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center" id="wifi-cell-${p.id}">${p.wifi ? `<span class="bg-gray-800 text-yellow-400 font-mono px-2 py-1 rounded text-sm">${p.wifi}</span>` : `<span class="text-gray-400">-</span>`}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-base md:text-lg text-gray-500">${idx + 1}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-base md:text-lg font-bold text-orange-700">${p.regId}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-base md:text-lg font-medium text-gray-900 name-display">${getFullName(p)}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-center text-base md:text-lg text-gray-600 font-semibold">${p.vassa || '-'}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-center text-base md:text-lg text-gray-600">${p.phone}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-base md:text-lg text-gray-600">${p.temple}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-base md:text-lg text-gray-600">${p.province}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day1 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration('${p.id}', 1, this.checked)"></td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day2 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration('${p.id}', 2, this.checked)"></td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-center" id="wifi-cell-${p.id}">${p.wifi ? `<span class="bg-gray-800 text-yellow-400 font-mono px-3 py-1 rounded text-base md:text-lg">${p.wifi}</span>` : `<span class="text-gray-400">-</span>`}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -433,8 +437,8 @@
         window.switchView = function(name) {
             document.getElementById('view-registration').classList.toggle('hidden-view', name !== 'registration');
             document.getElementById('view-dashboard').classList.toggle('hidden-view', name !== 'dashboard');
-            document.getElementById('nav-reg').className = name === 'registration' ? 'bg-orange-700 text-white px-4 py-2 rounded transition font-medium text-sm md:text-base' : 'hover:bg-orange-500 px-4 py-2 rounded transition font-medium text-sm md:text-base';
-            document.getElementById('nav-dash').className = name === 'dashboard' ? 'bg-orange-700 text-white px-4 py-2 rounded transition font-medium text-sm md:text-base' : 'hover:bg-orange-500 px-4 py-2 rounded transition font-medium text-sm md:text-base';
+            document.getElementById('nav-reg').className = name === 'registration' ? 'bg-orange-700 text-white px-4 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg' : 'hover:bg-orange-500 px-4 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg';
+            document.getElementById('nav-dash').className = name === 'dashboard' ? 'bg-orange-700 text-white px-4 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg' : 'hover:bg-orange-500 px-4 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg';
             if (name === 'dashboard') window.updateDashboard();
         }
 
@@ -843,14 +847,15 @@
             document.getElementById('summary-filter-label').innerText = label;
 
             const body = document.getElementById('summaryTableBody');
+            // ปรับขนาดอักษรในตารางสรุปผล
             body.innerHTML = filteredUsers.map(p => `
                 <tr>
-                    <td class="p-2 border-b font-bold">${p.regId}</td>
-                    <td class="p-2 border-b name-display">${getFullName(p)}</td>
-                    <td class="p-2 border-b">${p.province}</td>
-                    <td class="p-2 border-b text-center">${p.day1 ? '✅' : '-'}</td>
-                    <td class="p-2 border-b text-center">${p.day2 ? '✅' : '-'}</td>
-                    <td class="p-2 border-b text-center font-mono text-xs">${p.wifi || '-'}</td>
+                    <td class="p-3 border-b font-bold text-base md:text-lg">${p.regId}</td>
+                    <td class="p-3 border-b name-display text-base md:text-lg">${getFullName(p)}</td>
+                    <td class="p-3 border-b text-base md:text-lg">${p.province}</td>
+                    <td class="p-3 border-b text-center text-base md:text-lg">${p.day1 ? '✅' : '-'}</td>
+                    <td class="p-3 border-b text-center text-base md:text-lg">${p.day2 ? '✅' : '-'}</td>
+                    <td class="p-3 border-b text-center font-mono text-sm md:text-base">${p.wifi || '-'}</td>
                 </tr>
             `).join('');
         }
