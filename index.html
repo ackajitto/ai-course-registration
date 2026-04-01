@@ -290,27 +290,31 @@
     <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase Configuration setup
         let app, auth, db, user, attendeesRef;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCGBzef3W2n2OZZQ9g5VibG2bA-SAHdrZU",
+            authDomain: "registration-event-4c5e1.firebaseapp.com",
+            projectId: "registration-event-4c5e1",
+            storageBucket: "registration-event-4c5e1.firebasestorage.app",
+            messagingSenderId: "295278823045",
+            appId: "1:295278823045:web:201f4a1555435ab5a68bec"
+        };
 
         try {
-            const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
-            const firebaseConfig = JSON.parse(firebaseConfigStr);
-            if (Object.keys(firebaseConfig).length > 0) {
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                attendeesRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendees');
-            } else {
-                document.getElementById('sync-status').innerText = 'ทำงานแบบออฟไลน์';
-                document.getElementById('sync-status').className = 'text-sm bg-gray-600 px-2 py-1 rounded-full text-gray-200';
-            }
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            // จัดเก็บข้อมูลลงในตาราง (Collection) ชื่อ 'registration_data'
+            attendeesRef = collection(db, 'registration_data');
         } catch (e) {
-            console.warn("ไม่สามารถโหลดการตั้งค่าฐานข้อมูลได้ ระบบทำงานในโหมดออฟไลน์", e);
+            console.error("Firebase Error:", e);
+            document.getElementById('sync-status').innerText = 'ทำงานแบบออฟไลน์';
+            document.getElementById('sync-status').className = 'text-sm bg-gray-600 px-2 py-1 rounded-full text-gray-200';
         }
 
         // Global State
@@ -319,15 +323,12 @@
         let currentPhotoPersonId = null; 
         let isSortedByVassaDesc = false;
 
-        // Initialize App & Auth
+        // Initialize Auth
         async function initAuth() {
             if (!auth) return;
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // ล็อกอินแบบไม่ระบุตัวตนเพื่อเข้าถึงฐานข้อมูล
+                await signInAnonymously(auth);
             } catch(e) {
                 console.error("Auth error", e);
             }
