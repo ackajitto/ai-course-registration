@@ -133,9 +133,20 @@
                     <h1 class="text-2xl md:text-3xl font-bold text-orange-800 mb-2">สรุปผลการลงทะเบียน</h1>
                     <p class="text-gray-600">สถิติและข้อมูลผู้เข้าร่วมเพื่อการทำรายงาน</p>
                 </div>
-                <button onclick="exportCSV()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-md font-medium text-lg flex items-center gap-2 transition">
-                    <span>📥</span> ดึงข้อมูล (CSV / Excel)
-                </button>
+                <div class="flex flex-wrap gap-2">
+                    <!-- ซ่อน Input File ไว้แล้วใช้ปุ่มกดเรียกแทน -->
+                    <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="importCSV(event)">
+                    <button onclick="document.getElementById('csvFileInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 md:px-6 rounded-lg shadow-md font-medium text-base md:text-lg flex items-center gap-2 transition">
+                        <span>📤</span> เพิ่มข้อมูล (CSV)
+                    </button>
+                    <button onclick="exportCSV()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-3 md:px-6 rounded-lg shadow-md font-medium text-base md:text-lg flex items-center gap-2 transition">
+                        <span>📥</span> ดึงข้อมูล (CSV / Excel)
+                    </button>
+                    <!-- ปุ่มล้างข้อมูล -->
+                    <button onclick="resetData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-3 md:px-6 rounded-lg shadow-md font-medium text-base md:text-lg flex items-center gap-2 transition">
+                        <span>🗑️</span> ล้างข้อมูลทั้งหมด
+                    </button>
+                </div>
             </div>
 
             <!-- Stats Grid -->
@@ -523,6 +534,131 @@
                 data: { labels: ['วันที่ 1', 'วันที่ 2'], datasets: [{ data: [d1, d2], backgroundColor: ['rgba(249, 115, 22, 0.8)', 'rgba(34, 197, 94, 0.8)'], borderWidth: 1 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
+        }
+
+        // ==========================================
+        // นำเข้าข้อมูลจาก CSV (IMPORT CSV)
+        // ==========================================
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split(/\r\n|\n/);
+                let addedCount = 0;
+                
+                // ข้ามบรรทัดแรก (บรรทัดส่วนหัวของตาราง)
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    const cols = parseCSVLine(lines[i]);
+                    if (cols.length < 9) continue; // ตรวจสอบความครบถ้วนของคอลัมน์
+
+                    const regId = cols[1].trim();
+                    
+                    // ป้องกันการนำเข้าข้อมูลซ้ำ เช็คจากรหัสประจำตัว
+                    if (attendees.find(a => a.regId === regId)) continue;
+                    
+                    const fullName = cols[2].trim();
+                    let prefix = "", firstName = "", lastName = "";
+                    
+                    // แยกชื่อและนามสกุลด้วย 2 เคาะ ตามที่ตั้งไว้ในระบบส่งออก
+                    const nameParts = fullName.split("  ");
+                    if (nameParts.length >= 2) {
+                        lastName = nameParts.pop().trim();
+                        const firstParts = nameParts.join("  ").split(" ");
+                        prefix = firstParts[0].trim();
+                        firstName = firstParts.slice(1).join(" ").trim();
+                    } else {
+                        const parts = fullName.split(" ");
+                        prefix = parts[0] || "";
+                        firstName = parts.slice(1).join(" ") || "";
+                    }
+
+                    const vassa = cols[3].trim() === '-' ? null : parseInt(cols[3].trim(), 10);
+                    const phone = cols[4].trim();
+                    const temple = cols[5].trim();
+                    const province = cols[6].trim();
+                    const day1 = cols[7].trim() === 'มา';
+                    const day2 = cols[8].trim() === 'มา';
+                    const wifi = (cols[9] && cols[9].trim() !== '-') ? cols[9].trim() : null;
+
+                    const newId = attendees.length > 0 ? Math.max(...attendees.map(p => p.id)) + 1 : 1;
+
+                    attendees.unshift({
+                        id: newId,
+                        regId: regId,
+                        prefix: prefix,
+                        firstName: firstName,
+                        lastName: lastName,
+                        vassa: isNaN(vassa) ? null : vassa,
+                        phone: phone,
+                        temple: temple,
+                        province: province,
+                        day1: day1,
+                        day2: day2,
+                        wifi: wifi,
+                        isNew: true // ใส่แท็กแจ้งว่าเป็นรายชื่อใหม่เพื่อไฮไลต์สี
+                    });
+                    addedCount++;
+                }
+
+                alert(`นำเข้าข้อมูลสำเร็จจำนวน ${addedCount} รายการ \n(ข้ามข้อมูลที่รหัสประจำตัวซ้ำในระบบเรียบร้อยแล้ว)`);
+                handleSearch();
+                if (!document.getElementById('view-dashboard').classList.contains('hidden-view')) {
+                    updateDashboard();
+                }
+                event.target.value = ''; // รีเซ็ตไฟล์เพื่อให้สามารถอัพโหลดไฟล์เดิมได้อีก
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            reader.readAsText(file);
+        }
+
+        // ตัวช่วยสำหรับแยกคอลัมน์ CSV กรณีที่ข้อมูลมีลูกน้ำ (,) ปะปนอยู่ข้างใน
+        function parseCSVLine(text) {
+            let ret = [];
+            let inQuote = false;
+            let value = '';
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"') {
+                    if (inQuote && text[i+1] === '"') {
+                        value += '"'; i++; // จัดการ Double Quotes ภายใน
+                    } else {
+                        inQuote = !inQuote;
+                    }
+                } else if (char === ',' && !inQuote) {
+                    ret.push(value);
+                    value = '';
+                } else {
+                    value += char;
+                }
+            }
+            ret.push(value);
+            return ret;
+        }
+
+        // ==========================================
+        // รีเซ็ตล้างข้อมูลทั้งหมด (RESET DATA)
+        // ==========================================
+        function resetData() {
+            const confirmReset = confirm("คำเตือน: คุณแน่ใจหรือไม่ที่จะลบ 'รายชื่อและข้อมูลทั้งหมด' ออกจากระบบ?\n\n* หากลบแล้วจะไม่สามารถกู้คืนได้ แนะนำให้ดึงข้อมูล (Export) เก็บไว้ก่อนครับ *");
+            
+            if (confirmReset) {
+                attendees = []; // ล้าง Array ข้อมูลทั้งหมด
+                currentWifiCounter = 1; // รีเซ็ตตัวนับ WiFi
+                
+                // รีเฟรชหน้าจอทั้งหมด
+                handleSearch();
+                
+                if (!document.getElementById('view-dashboard').classList.contains('hidden-view')) {
+                    updateDashboard();
+                }
+                
+                alert("ล้างข้อมูลทั้งหมดในระบบเรียบร้อยแล้วครับ");
+            }
         }
 
         function exportCSV() {
