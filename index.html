@@ -1,172 +1,895 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>โครงการบรรพชาสามเณร - ระบบจองและแอดมิน</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Sarabun', sans-serif; background-color: #FDFBF7; }
-    .animate-in { animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
-  </style>
-</head>
-<body>
-  <div id="root"></div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบลงทะเบียนและออกรหัสผู้ใช้งาน</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts for Thai Language -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
-
-    const Icon = ({ d, size = 16, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        {Array.isArray(d) ? d.map((path, i) => <path key={i} d={path}/>) : <path d={d}/>}
-      </svg>
-    );
-
-    const ICONS = {
-      calendar: "M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
-      check: "M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01l-3-3",
-      x: "M18 6 6 18M6 6l12 12",
-      settings: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"
-    };
-
-    // สมมติว่ามีคนจองเข้ามารอการยืนยัน
-    const INITIAL_BOOKINGS = {
-      '2026-04-01-breakfast': { mainHost: { status: 'booked', name: 'คุณใจบุญ กุศลทาน' } },
-      '2026-04-05-lunch': { mainHost: { status: 'pending', name: 'คุณสมชาย ใจดี' } } // รอแอดมินกดรับ
-    };
-
-    function App() {
-      const [bookings, setBookings] = useState(INITIAL_BOOKINGS);
-      const [isAdminMode, setIsAdminMode] = useState(false); // สถานะเปิดปิดหน้าแอดมิน
-
-      // ฟังก์ชันสำหรับแอดมินกดยืนยัน (Approve)
-      const handleApprove = (slotKey) => {
-        setBookings(prev => ({
-          ...prev,
-          [slotKey]: {
-            ...prev[slotKey],
-            mainHost: { ...prev[slotKey].mainHost, status: 'booked' } // เปลี่ยนจาก pending เป็น booked
-          }
-        }));
-      };
-
-      // ฟังก์ชันสำหรับแอดมินกดยกเลิก (Reject)
-      const handleReject = (slotKey) => {
-        if(window.confirm('แน่ใจหรือไม่ที่จะลบรายการจองนี้?')) {
-          setBookings(prev => {
-            const newBookings = { ...prev };
-            delete newBookings[slotKey].mainHost;
-            return newBookings;
-          });
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #fefce8; /* amber-50 */
         }
-      };
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 30vh;
+            max-height: 350px;
+        }
+        .hidden-view {
+            display: none !important;
+        }
+        .large-checkbox {
+            width: 1.75rem; /* ขยายขนาด checkbox ให้ใหญ่ขึ้นสมดุลกับตัวอักษร */
+            height: 1.75rem;
+            cursor: pointer;
+            accent-color: #f97316;
+        }
+        .name-display {
+            white-space: pre; /* บังคับให้อยู่บรรทัดเดียวเสมอ และรักษาช่องว่าง 2 เคาะไว้ */
+        }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden">
 
-      // ฟังก์ชันดึงรายการที่รอการยืนยันทั้งหมดมาแสดงให้แอดมินเห็น
-      const getPendingBookings = () => {
-        let pending = [];
-        Object.keys(bookings).forEach(key => {
-          if (bookings[key].mainHost?.status === 'pending') {
-            pending.push({ key, ...bookings[key].mainHost });
-          }
-        });
-        return pending;
-      };
-
-      return (
-        <div className="min-h-screen relative pb-20">
-          
-          {/* ================= ส่วนของแอดมิน (Admin Panel) ================= */}
-          {isAdminMode ? (
-            <div className="max-w-5xl mx-auto p-6 mt-10">
-              <div className="flex justify-between items-center mb-6 border-b pb-4">
-                <h1 className="text-3xl font-bold text-gray-800">⚙️ ระบบจัดการหลังบ้าน (Admin)</h1>
-                <button onClick={() => setIsAdminMode(false)} className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
-                  กลับไปหน้าร้าน (User View)
-                </button>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <h2 className="text-xl font-bold mb-4 text-orange-600">🟡 รายการรอการตรวจสอบ (สลิป/หลักฐาน)</h2>
-                
-                {getPendingBookings().length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">ไม่มีรายการรอตรวจสอบในขณะนี้ 🎉</p>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="bg-gray-100 text-gray-700">
-                          <th className="p-3 border-b">รหัสวันที่/มื้อ</th>
-                          <th className="p-3 border-b">ชื่อผู้จอง</th>
-                          <th className="p-3 border-b">สถานะ</th>
-                          <th className="p-3 border-b">การจัดการ</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {getPendingBookings().map((item) => (
-                          <tr key={item.key} className="hover:bg-gray-50">
-                            <td className="p-3 border-b font-medium">{item.key}</td>
-                            <td className="p-3 border-b">{item.name}</td>
-                            <td className="p-3 border-b">
-                              <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-bold">รอตรวจสอบ</span>
-                            </td>
-                            <td className="p-3 border-b flex gap-2">
-                              <button onClick={() => handleApprove(item.key)} className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded shadow-sm text-sm flex items-center gap-1">
-                                <Icon d={ICONS.check} size={14} /> อนุมัติ
-                              </button>
-                              <button onClick={() => handleReject(item.key)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded shadow-sm text-sm flex items-center gap-1">
-                                <Icon d={ICONS.x} size={14} /> ยกเลิก
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            /* ================= ส่วนของหน้าร้าน (User View) ย่อให้ดูง่ายขึ้น ================= */
-            <div className="max-w-3xl mx-auto mt-10 p-6 text-center">
-              <h1 className="text-4xl font-bold mb-8">โครงการบรรพชาสามเณร (หน้าร้าน)</h1>
-              
-              <div className="grid grid-cols-2 gap-4">
-                {/* จำลองการแสดงผลบนตาราง */}
-                <div className={`p-6 rounded-xl border ${bookings['2026-04-01-breakfast']?.mainHost?.status === 'booked' ? 'bg-green-100 border-green-300' : 'bg-white'}`}>
-                  <h3 className="font-bold">วันที่ 1 เม.ย. (มื้อเช้า)</h3>
-                  <p className="mt-2 text-green-700 font-medium">เจ้าภาพ: {bookings['2026-04-01-breakfast']?.mainHost?.name || '-'}</p>
-                </div>
-                
-                <div className={`p-6 rounded-xl border ${bookings['2026-04-05-lunch']?.mainHost?.status === 'booked' ? 'bg-green-100 border-green-300' : 'bg-yellow-100 border-yellow-300'}`}>
-                  <h3 className="font-bold">วันที่ 5 เม.ย. (มื้อเพล)</h3>
-                  <p className="mt-2 text-yellow-700 font-medium">เจ้าภาพ: {bookings['2026-04-05-lunch']?.mainHost?.name || 'รอคนจอง'}</p>
-                  <p className="text-xs text-red-500 mt-1">(ตอนนี้อยู่ในสถานะ: {bookings['2026-04-05-lunch']?.mainHost?.status})</p>
-                </div>
-              </div>
-              
-              <p className="mt-10 text-gray-500">จำลองการจอง: ลองกดสลับโหมดไปที่ Admin แล้วกด "อนุมัติ" ดูสิคะ ชื่อจะกลายเป็นสีเขียวทันที!</p>
-            </div>
-          )}
-
-          {/* ปุ่มลับสำหรับเปิดโหมด Admin มุมขวาล่าง */}
-          <button 
-            onClick={() => setIsAdminMode(!isAdminMode)}
-            className="fixed bottom-5 right-5 bg-slate-900 text-white p-4 rounded-full shadow-2xl hover:bg-slate-800 transition-all z-50 flex items-center gap-2 font-bold"
-          >
-            <Icon d={ICONS.settings} size={20} />
-            {isAdminMode ? 'ดูหน้าร้าน' : 'เข้าสู่ระบบแอดมิน'}
-          </button>
-          
+    <!-- Navigation Bar -->
+    <nav class="bg-orange-600 text-white shadow-md p-4 flex flex-wrap justify-between items-center shrink-0 z-40 gap-4">
+        <div class="text-xl md:text-3xl font-semibold flex items-center gap-3 whitespace-nowrap">
+            <span>📝</span> ระบบลงทะเบียน
+            <span id="sync-status" class="text-sm md:text-base bg-orange-800 px-3 py-1 rounded-full text-orange-200">กำลังเชื่อมต่อฐานข้อมูล...</span>
         </div>
-      );
-    }
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+        <div class="flex gap-2 md:gap-4 flex-wrap justify-end">
+            <button onclick="openWalkInModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg whitespace-nowrap shadow-md border border-blue-500">
+                + เพิ่มรายชื่อ
+            </button>
+            <button onclick="switchView('registration')" id="nav-reg" class="bg-orange-700 hover:bg-orange-800 px-3 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg whitespace-nowrap">หน้าลงทะเบียน</button>
+            <button onclick="switchView('dashboard')" id="nav-dash" class="hover:bg-orange-500 px-3 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg whitespace-nowrap">สรุปผล</button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow p-4 md:p-8 overflow-y-auto bg-amber-50/50">
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: REGISTRATION & SEARCH -->
+        <!-- ========================================== -->
+        <!-- ขยายความกว้างสูงสุดให้เต็มจอคอมพิวเตอร์ -->
+        <section id="view-registration" class="w-full max-w-[98%] 2xl:max-w-[1600px] mx-auto">
+            <div class="mb-6 md:mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-orange-800 mb-3">ค้นหาและลงทะเบียนผู้เข้าร่วมงาน</h1>
+                <p class="text-gray-600 text-lg md:text-xl leading-relaxed">พิมพ์รหัสประจำตัว ชื่อ จังหวัด หรือเบอร์โทรศัพท์ เพื่อค้นหา <br class="hidden md:block"><span class="text-base md:text-lg text-gray-500 md:mt-1 inline-block">(สามารถกดที่แถบรายชื่อเพื่อดูข้อมูลแบบเต็มหน้าจอได้)</span></p>
+            </div>
+
+            <!-- Search Box -->
+            <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-orange-100 mb-6 flex items-center gap-4">
+                <span class="text-3xl font-canvas">🔍</span>
+                <!-- ขยายช่องค้นหาและตัวอักษร -->
+                <input type="text" id="searchInput" placeholder="ค้นหา รหัส, ชื่อ, วัด, จังหวัด, เบอร์โทร..." 
+                       class="w-full text-xl md:text-2xl p-3 outline-none focus:border-b-4 focus:border-orange-500 transition-colors"
+                       onkeyup="handleSearch()">
+            </div>
+
+            <!-- Data Table -->
+            <div class="bg-white rounded-lg shadow-sm border border-orange-100 overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-orange-50 text-orange-800">
+                        <!-- ปรับขนาดตัวอักษรหัวตารางให้ใหญ่ขึ้น (text-base md:text-lg) -->
+                        <tr>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-left text-base md:text-lg font-semibold uppercase tracking-wider">ลำดับ</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-left text-base md:text-lg font-semibold uppercase tracking-wider">รหัสประจำตัว</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-left text-base md:text-lg font-semibold uppercase tracking-wider whitespace-nowrap">ฉายา/ชื่อ-สกุล</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-center text-base md:text-lg font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('vassa')" title="คลิกเพื่อเรียงตามพรรษา">
+                                พรรษา <span id="sort-vassa-icon" class="ml-1 text-orange-500 opacity-50">🔽</span>
+                            </th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-center text-base md:text-lg font-semibold uppercase tracking-wider">เบอร์โทรศัพท์</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-left text-base md:text-lg font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('temple')" title="คลิกเพื่อเรียงตามสังกัดวัด">
+                                สังกัดวัด <span id="sort-temple-icon" class="ml-1 text-orange-500 opacity-50">🔽</span>
+                            </th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-left text-base md:text-lg font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-orange-100 transition-colors" onclick="toggleSort('province')" title="คลิกเพื่อเรียงตามจังหวัด">
+                                จังหวัด <span id="sort-province-icon" class="ml-1 text-orange-500 opacity-50">🔽</span>
+                            </th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-center text-base md:text-lg font-semibold uppercase tracking-wider">มาวันที่ 1</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-center text-base md:text-lg font-semibold uppercase tracking-wider">มาวันที่ 2</th>
+                            <th class="px-4 py-4 md:px-6 md:py-5 text-center text-base md:text-lg font-semibold uppercase tracking-wider">รหัส WiFi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Rows populated by JS -->
+                    </tbody>
+                </table>
+                <div id="noResultsMsg" class="hidden text-center py-10 text-xl text-gray-500">ไม่พบข้อมูลที่ค้นหา หรือระบบยังไม่มีข้อมูล (กรุณานำเข้า CSV)</div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: DASHBOARD & SUMMARY -->
+        <!-- ========================================== -->
+        <section id="view-dashboard" class="w-full max-w-[98%] 2xl:max-w-[1600px] mx-auto hidden-view mt-2">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-orange-800 mb-2">สรุปผลการลงทะเบียน</h1>
+                    <p class="text-gray-600 text-lg">สถิติและข้อมูลผู้เข้าร่วมเพื่อการทำรายงาน</p>
+                </div>
+                <div class="flex flex-wrap gap-3 items-center">
+                    <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="importCSV(event)">
+                    <!-- ปุ่มจำลองข้อมูลสำหรับทดสอบระบบ -->
+                    <button onclick="generateMockData()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg shadow-md font-medium text-base transition mr-4" title="สร้างรายชื่อตัวอย่างเพื่อทดสอบ">
+                        🛠️ ทดสอบ 50 รายชื่อ
+                    </button>
+
+                    <button onclick="document.getElementById('csvFileInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 md:px-6 rounded-lg shadow-md font-medium text-lg flex items-center gap-2 transition">
+                        <span>📤</span> เพิ่มข้อมูล (CSV)
+                    </button>
+                    <button onclick="exportCSV()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-3 md:px-6 rounded-lg shadow-md font-medium text-lg flex items-center gap-2 transition">
+                        <span>📥</span> ดึงข้อมูล (CSV ทั้งหมด)
+                    </button>
+                    <button onclick="resetData()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-3 md:px-6 rounded-lg shadow-md font-medium text-lg flex items-center gap-2 transition">
+                        <span>🗑️</span> ล้างข้อมูล
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid (Clickable) -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <!-- Total -->
+                <div onclick="filterSummary('all')" class="bg-white rounded-xl shadow border-l-4 border-blue-500 p-6 md:p-8 cursor-pointer hover:bg-blue-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อทั้งหมด">
+                    <p class="text-gray-500 text-base md:text-lg font-semibold mb-2">ยอดรวมผู้ลงทะเบียน</p>
+                    <p class="text-4xl md:text-5xl font-bold text-gray-800" id="stat-total">0</p>
+                </div>
+                <!-- Day 1 -->
+                <div onclick="filterSummary('day1')" class="bg-white rounded-xl shadow border-l-4 border-orange-500 p-6 md:p-8 cursor-pointer hover:bg-orange-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อเฉพาะคนที่มาวันที่ 1">
+                    <p class="text-gray-500 text-base md:text-lg font-semibold mb-2">มาวันที่ 1</p>
+                    <p class="text-4xl md:text-5xl font-bold text-gray-800" id="stat-day1">0</p>
+                </div>
+                <!-- Day 2 -->
+                <div onclick="filterSummary('day2')" class="bg-white rounded-xl shadow border-l-4 border-green-500 p-6 md:p-8 cursor-pointer hover:bg-green-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อเฉพาะคนที่มาวันที่ 2">
+                    <p class="text-gray-500 text-base md:text-lg font-semibold mb-2">มาวันที่ 2</p>
+                    <p class="text-4xl md:text-5xl font-bold text-gray-800" id="stat-day2">0</p>
+                </div>
+                <!-- Both Days -->
+                <div onclick="filterSummary('both')" class="bg-white rounded-xl shadow border-l-4 border-purple-500 p-6 md:p-8 cursor-pointer hover:bg-purple-50 transition transform hover:-translate-y-1" title="คลิกเพื่อดูรายชื่อเฉพาะคนที่มาครบ 2 วัน">
+                    <p class="text-gray-500 text-base md:text-lg font-semibold mb-2">มาทั้ง 2 วัน</p>
+                    <p class="text-4xl md:text-5xl font-bold text-purple-700 drop-shadow-sm" id="stat-both">0</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 mb-8">
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-700 mb-6 text-center">สัดส่วนการเข้าร่วมแต่ละวัน</h3>
+                <div class="chart-container"><canvas id="attendanceChart"></canvas></div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 md:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h3 class="text-xl md:text-2xl font-semibold text-gray-700 flex items-center">
+                        รายชื่อผู้เข้าร่วม 
+                        <span id="summary-filter-label" class="text-blue-600 bg-blue-50 px-3 py-1 rounded-lg ml-4 font-normal text-base md:text-lg border border-blue-200">(ทั้งหมด)</span>
+                    </h3>
+                    <button onclick="exportFilteredCSV()" class="bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300 px-5 py-3 rounded-lg text-base md:text-lg font-semibold transition flex items-center gap-2 shadow-sm">
+                        <span>⬇️</span> โหลด Excel เฉพาะกลุ่มนี้
+                    </button>
+                </div>
+                <div class="overflow-x-auto h-96 overflow-y-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50 sticky top-0">
+                            <tr>
+                                <th class="p-3 md:p-4 text-left text-base md:text-lg font-semibold text-gray-700">รหัสประจำตัว</th>
+                                <th class="p-3 md:p-4 text-left text-base md:text-lg font-semibold text-gray-700">ชื่อ-สกุล</th>
+                                <th class="p-3 md:p-4 text-left text-base md:text-lg font-semibold text-gray-700">จังหวัด</th>
+                                <th class="p-3 md:p-4 text-center text-base md:text-lg font-semibold text-gray-700">วัน 1</th>
+                                <th class="p-3 md:p-4 text-center text-base md:text-lg font-semibold text-gray-700">วัน 2</th>
+                                <th class="p-3 md:p-4 text-center text-base md:text-lg font-semibold text-gray-700">WiFi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryTableBody" class="divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- OVERLAY 0: WALK-IN (เพิ่มรายชื่อ) -->
+    <!-- ========================================== -->
+    <div id="walkin-overlay" class="fixed inset-0 bg-black/50 z-50 hidden-view flex flex-col justify-center items-center p-4 overflow-y-auto">
+        <div class="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl w-full max-w-4xl relative border-t-8 border-blue-500">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8">➕ เพิ่มรายชื่อผู้เข้าร่วมงาน</h2>
+            <div class="flex flex-col gap-6">
+                <div>
+                    <label class="text-gray-600 mb-2 block text-lg font-medium">รหัสประจำตัว (รันให้อัตโนมัติ)</label>
+                    <input type="text" id="walkin-regId" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none bg-blue-50 font-bold text-blue-800">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="text-gray-600 mb-2 block text-lg font-medium">คำนำหน้า/ฉายา</label>
+                        <input type="text" id="walkin-prefix" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-gray-600 mb-2 block text-lg font-medium">ชื่อ <span class="text-red-500">*</span></label>
+                        <input type="text" id="walkin-firstname" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-gray-600 mb-2 block text-lg font-medium">นามสกุล</label>
+                        <input type="text" id="walkin-lastname" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-gray-600 mb-2 block text-lg font-medium">อายุพรรษา (เว้นได้หากเป็นฆราวาส)</label>
+                        <input type="number" id="walkin-vassa" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-gray-600 mb-2 block text-lg font-medium">เบอร์โทรศัพท์</label>
+                        <input type="text" id="walkin-phone" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="text-gray-600 mb-2 block text-lg font-medium">สังกัดวัด / หน่วยงาน <span class="text-red-500">*</span></label><input type="text" id="walkin-temple" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none"></div>
+                    <div><label class="text-gray-600 mb-2 block text-lg font-medium">จังหวัด <span class="text-red-500">*</span></label><input type="text" id="walkin-province" class="border-2 border-gray-200 rounded-xl p-4 text-2xl w-full focus:border-blue-500 outline-none"></div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-5 mt-12">
+                <button onclick="closeWalkInModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-2xl font-medium py-3 px-10 rounded-full transition">ยกเลิก</button>
+                <button onclick="saveWalkIn()" class="bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold py-3 px-12 rounded-full shadow-md transition transform hover:-translate-y-1">💾 บันทึกรายชื่อ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- OVERLAY 1: PROFILE DETAILS -->
+    <!-- ========================================== -->
+    <div id="profile-overlay" class="fixed inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 z-50 hidden-view flex flex-col justify-center items-center p-4 md:p-8 overflow-x-hidden overflow-y-auto">
+        <!-- ขยายกรอบให้กว้างสูงสุด 95vw หรือ 1400px -->
+        <div class="w-full max-w-[95vw] xl:max-w-7xl 2xl:max-w-[1400px] bg-white/95 backdrop-blur-md rounded-[3rem] shadow-2xl border-8 border-orange-200 p-8 md:p-20 relative text-center">
+            <button onclick="closeProfileView()" class="absolute top-4 right-4 md:top-8 md:right-8 bg-gray-200 hover:bg-red-100 hover:text-red-600 text-gray-600 rounded-full w-12 h-12 md:w-16 md:h-16 flex items-center justify-center text-2xl md:text-3xl transition-colors duration-300 shadow-sm">✕</button>
+            
+            <div class="bg-orange-100 inline-block px-6 md:px-10 py-3 rounded-2xl border-2 border-orange-300 mb-8 md:mb-10 mt-4 shadow-inner">
+                <span class="text-2xl md:text-4xl text-orange-800 mr-3 font-normal">รหัสประจำตัว:</span>
+                <span id="profile-reg-id" class="text-4xl md:text-7xl font-bold text-orange-600 tracking-widest"></span>
+            </div>
+            
+            <!-- ใช้ clamp() เพื่อปรับลดขนาดตัวอักษรอัตโนมัติ ป้องกันการขึ้นบรรทัดใหม่ -->
+            <h1 id="profile-name" class="name-display w-full overflow-hidden text-ellipsis text-[clamp(1.8rem,5vw,6rem)] font-bold text-gray-800 mb-8 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-800 to-yellow-800"></h1>
+            
+            <div class="w-32 h-2 bg-orange-300 mx-auto rounded-full mb-8"></div>
+            <h3 id="profile-temple" class="text-3xl md:text-5xl text-orange-700 font-medium mb-4"></h3>
+            <h4 id="profile-province" class="text-2xl md:text-4xl text-gray-600 font-normal"></h4>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- OVERLAY 2: PHOTO & WiFi VIEW -->
+    <!-- ========================================== -->
+    <div id="photo-overlay" class="fixed inset-0 bg-white z-50 flex flex-col justify-center items-center hidden-view p-4 md:p-8 overflow-x-hidden overflow-y-auto">
+        <div class="w-full max-w-[95vw] xl:max-w-6xl 2xl:max-w-[1200px] text-center flex flex-col gap-8 md:gap-10">
+            <div class="text-green-600 text-2xl md:text-4xl font-bold mb-2 md:mb-4 flex items-center justify-center gap-2"><span>✅</span> ยืนยันการลงทะเบียนสำเร็จ</div>
+            
+            <div id="photo-view-mode" class="flex flex-col gap-8 md:gap-10">
+                <div class="bg-orange-50 border-4 border-orange-200 rounded-3xl p-6 md:p-12 shadow-lg relative mt-6">
+                    <div class="absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 bg-orange-600 text-white px-6 md:px-12 py-2 md:py-4 rounded-full shadow-md border-4 border-white tracking-wider flex items-center gap-3 w-max">
+                        <span class="text-lg md:text-2xl font-normal text-orange-200">รหัสประจำตัว:</span>
+                        <span id="photo-reg-id" class="font-bold text-2xl md:text-5xl text-white"></span>
+                    </div>
+                    
+                    <!-- ใช้ clamp() เพื่อปรับลดขนาดตัวอักษรอัตโนมัติ ป้องกันการขึ้นบรรทัดใหม่ -->
+                    <h2 id="photo-name" class="name-display w-full overflow-hidden text-ellipsis text-[clamp(1.5rem,4.5vw,5rem)] font-bold text-gray-800 mb-4 md:mb-8 leading-tight mt-10"></h2>
+                    
+                    <h3 id="photo-temple" class="text-2xl md:text-5xl text-orange-700 font-medium mb-3"></h3>
+                    <h4 id="photo-province" class="text-xl md:text-4xl text-gray-500 mb-6 md:mb-10"></h4>
+                    <button onclick="togglePhotoEditMode(true)" class="bg-white hover:bg-orange-100 text-orange-700 text-lg md:text-2xl font-medium py-3 px-8 rounded-full transition shadow-sm border border-orange-200 inline-flex items-center gap-2"><span>✏️</span> แก้ไขข้อมูล</button>
+                </div>
+                
+                <div class="bg-gray-800 text-white rounded-3xl p-6 md:p-10 shadow-xl border-4 border-gray-600 inline-block mx-auto min-w-[300px] md:min-w-[600px]">
+                    <p class="text-xl md:text-3xl text-gray-300 mb-4 font-light">รหัสผ่านอินเทอร์เน็ต (WiFi)</p>
+                    <div class="flex flex-col items-center justify-center gap-5 mt-4">
+                        <div class="flex items-center gap-4 text-3xl md:text-6xl font-bold"><span class="text-gray-400 text-xl md:text-3xl font-normal w-20 md:w-32 text-right">User:</span><span id="photo-wifi-user" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-4 md:px-8 py-3 rounded-lg border border-gray-700"></span></div>
+                        <div class="flex items-center gap-4 text-3xl md:text-6xl font-bold"><span class="text-gray-400 text-xl md:text-3xl font-normal w-20 md:w-32 text-right">Pass:</span><span id="photo-wifi-pass" class="text-yellow-400 tracking-wider font-mono bg-gray-900 px-4 md:px-8 py-3 rounded-lg border border-gray-700"></span></div>
+                    </div>
+                </div>
+                <div><button onclick="closePhotoView()" class="bg-red-500 hover:bg-red-600 text-white text-xl md:text-3xl font-bold py-3 md:py-5 px-10 md:px-16 rounded-full shadow-lg transition transform hover:scale-105 mt-4">ปิดหน้าต่าง</button></div>
+            </div>
+
+            <div id="photo-edit-mode" class="hidden-view bg-white p-6 md:p-12 rounded-3xl shadow-lg border-4 border-orange-200 text-left w-full mx-auto relative">
+                <h3 class="text-2xl md:text-4xl mb-6 md:mb-10 font-bold text-orange-800 text-center flex items-center justify-center gap-3"><span>✏️</span> แก้ไขข้อมูล</h3>
+                <div class="flex flex-col md:flex-row gap-5 mb-8">
+                    <div class="w-full md:w-1/4"><label class="text-gray-600 mb-2 block font-medium text-lg">คำนำหน้า</label><input type="text" id="photo-edit-prefix" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-3xl w-full focus:border-orange-500 outline-none"></div>
+                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium text-lg">ชื่อ</label><input type="text" id="photo-edit-firstname" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-3xl w-full focus:border-orange-500 outline-none"></div>
+                    <div class="w-full md:w-2/4"><label class="text-gray-600 mb-2 block font-medium text-lg">ฉายา/นามสกุล</label><input type="text" id="photo-edit-lastname" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-3xl w-full focus:border-orange-500 outline-none"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 md:mb-12">
+                    <div><label class="text-gray-600 mb-2 block font-medium text-lg">วัด</label><input type="text" id="photo-edit-temple" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-3xl w-full focus:border-orange-500 outline-none"></div>
+                    <div><label class="text-gray-600 mb-2 block font-medium text-lg">จังหวัด</label><input type="text" id="photo-edit-province" class="border-2 border-orange-200 rounded-xl p-3 md:p-4 text-xl md:text-3xl w-full focus:border-orange-500 outline-none"></div>
+                </div>
+                <div class="flex flex-col sm:flex-row justify-center gap-5 mt-6">
+                    <button onclick="savePhotoProfile()" class="bg-green-600 hover:bg-green-700 text-white text-xl md:text-3xl font-bold py-3 md:py-4 px-10 md:px-14 rounded-full shadow-lg transition">💾 บันทึกข้อมูล</button>
+                    <button onclick="togglePhotoEditMode(false)" class="bg-gray-400 hover:bg-gray-500 text-white text-xl md:text-3xl font-medium py-3 md:py-4 px-8 md:px-12 rounded-full shadow-md transition">ยกเลิก</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- FIREBASE & LOGIC -->
+    <!-- ========================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration setup
+        let app, auth, db, user, attendeesRef;
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCGBzef3W2n2OZZQ9g5VibG2bA-SAHdrZU",
+            authDomain: "registration-event-4c5e1.firebaseapp.com",
+            projectId: "registration-event-4c5e1",
+            storageBucket: "registration-event-4c5e1.firebasestorage.app",
+            messagingSenderId: "295278823045",
+            appId: "1:295278823045:web:201f4a1555435ab5a68bec"
+        };
+
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            // จัดเก็บข้อมูลลงในตาราง (Collection) ชื่อ 'registration_data'
+            attendeesRef = collection(db, 'registration_data');
+        } catch (e) {
+            console.error("Firebase Error:", e);
+            document.getElementById('sync-status').innerText = 'ทำงานแบบออฟไลน์';
+            document.getElementById('sync-status').className = 'text-sm md:text-base bg-gray-600 px-3 py-1 rounded-full text-gray-200';
+        }
+
+        // Global State
+        let attendees = [];
+        let chartInstance = null;
+        let currentPhotoPersonId = null; 
+        
+        // Sorting State
+        let currentSortColumn = 'id'; // ค่าเริ่มต้นคือ id
+        let currentSortOrder = 'desc'; // asc หรือ desc
+        
+        window.currentSummaryFilter = 'all'; // เก็บค่าว่าตอนนี้ตารางสรุปผลแสดงข้อมูลโหมดไหนอยู่
+
+        // Initialize Auth
+        async function initAuth() {
+            if (!auth) return;
+            try {
+                // ล็อกอินแบบไม่ระบุตัวตนเพื่อเข้าถึงฐานข้อมูล
+                await signInAnonymously(auth);
+            } catch(e) {
+                console.error("Auth error", e);
+            }
+        }
+
+        if (auth) {
+            initAuth();
+            onAuthStateChanged(auth, (currentUser) => {
+                user = currentUser;
+                if (user && attendeesRef) {
+                    document.getElementById('sync-status').innerText = 'เชื่อมต่อระบบ Cloud สำเร็จ 🟢';
+                    document.getElementById('sync-status').className = 'text-sm md:text-base bg-green-600 px-3 py-1 rounded-full text-white shadow-inner';
+                    
+                    // Listen for real-time changes
+                    onSnapshot(attendeesRef, (snapshot) => {
+                        const newData = [];
+                        snapshot.forEach(docSnap => {
+                            newData.push(docSnap.data());
+                        });
+                        attendees = newData;
+                        window.handleSearch();
+                        if (!document.getElementById('view-dashboard').classList.contains('hidden-view')) {
+                            window.updateDashboard();
+                        }
+                    }, (error) => {
+                        console.error("Snapshot error:", error);
+                        document.getElementById('sync-status').innerText = 'การซิงค์มีปัญหา 🔴';
+                    });
+                }
+            });
+        }
+
+        // Helper to construct name with 2-space gap
+        function getFullName(p) {
+            return `${p.prefix} ${p.firstName}  ${p.lastName}`;
+        }
+
+        // Render Table
+        window.renderTable = function(list) {
+            const tbody = document.getElementById('tableBody');
+            const noRes = document.getElementById('noResultsMsg');
+            tbody.innerHTML = '';
+            if (list.length === 0) { noRes.classList.remove('hidden'); return; }
+            noRes.classList.add('hidden');
+            
+            list.forEach((p, idx) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-orange-50 transition-colors cursor-pointer " + (p.isNew ? "bg-blue-50" : "");
+                row.onclick = () => window.openProfileView(p.id);
+                // อัปเดตขนาดอักษรในเซลล์ตาราง (text-base md:text-lg) และเพิ่ม Padding ให้ใหญ่ขึ้น
+                row.innerHTML = `
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-base md:text-lg text-gray-500">${idx + 1}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-base md:text-lg font-bold text-orange-700">${p.regId}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-base md:text-lg font-medium text-gray-900 name-display">${getFullName(p)}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-center text-base md:text-lg text-gray-600 font-semibold">${p.vassa || '-'}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-center text-base md:text-lg text-gray-600">${p.phone}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-base md:text-lg text-gray-600">${p.temple}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-base md:text-lg text-gray-600">${p.province}</td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day1 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration('${p.id}', 1, this.checked)"></td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-center"><input type="checkbox" class="large-checkbox" ${p.day2 ? 'checked' : ''} onclick="event.stopPropagation();" onchange="handleRegistration('${p.id}', 2, this.checked)"></td>
+                    <td class="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-center" id="wifi-cell-${p.id}">${p.wifi ? `<span class="bg-gray-800 text-yellow-400 font-mono px-3 py-1 rounded text-base md:text-lg">${p.wifi}</span>` : `<span class="text-gray-400">-</span>`}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // View Toggles
+        window.switchView = function(name) {
+            document.getElementById('view-registration').classList.toggle('hidden-view', name !== 'registration');
+            document.getElementById('view-dashboard').classList.toggle('hidden-view', name !== 'dashboard');
+            document.getElementById('nav-reg').className = name === 'registration' ? 'bg-orange-700 text-white px-4 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg' : 'hover:bg-orange-500 px-4 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg';
+            document.getElementById('nav-dash').className = name === 'dashboard' ? 'bg-orange-700 text-white px-4 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg' : 'hover:bg-orange-500 px-4 py-2 md:px-5 md:py-3 rounded transition font-medium text-sm md:text-lg';
+            if (name === 'dashboard') window.updateDashboard();
+        }
+
+        // Search & Sort
+        window.handleSearch = function() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = attendees.filter(p => 
+                getFullName(p).toLowerCase().includes(q) ||
+                p.temple.toLowerCase().includes(q) ||
+                p.province.toLowerCase().includes(q) ||
+                p.regId.toLowerCase().includes(q) ||
+                p.phone.includes(q)
+            );
+
+            // กระบวนการจัดเรียงข้อมูล
+            filtered.sort((a, b) => {
+                if (currentSortColumn === 'vassa') {
+                    let vA = a.vassa || 0;
+                    let vB = b.vassa || 0;
+                    return currentSortOrder === 'desc' ? vB - vA : vA - vB;
+                } else if (currentSortColumn === 'temple') {
+                    let tA = a.temple || "";
+                    let tB = b.temple || "";
+                    return currentSortOrder === 'desc' ? tB.localeCompare(tA, 'th') : tA.localeCompare(tB, 'th');
+                } else if (currentSortColumn === 'province') {
+                    let pA = a.province || "";
+                    let pB = b.province || "";
+                    return currentSortOrder === 'desc' ? pB.localeCompare(pA, 'th') : pA.localeCompare(pB, 'th');
+                } else {
+                    // ค่าเริ่มต้นคือจัดเรียงตาม ID ที่ถูกสร้างขึ้น (ให้คนมาใหม่สุดอยู่บนสุด)
+                    return currentSortOrder === 'desc' ? String(b.id).localeCompare(String(a.id)) : String(a.id).localeCompare(String(b.id));
+                }
+            });
+
+            window.renderTable(filtered);
+        }
+
+        window.toggleSort = function(column) {
+            if (currentSortColumn === column) {
+                // หากกดซ้ำที่คอลัมน์เดิม ให้สลับการเรียง มากไปน้อย <-> น้อยไปมาก
+                currentSortOrder = currentSortOrder === 'desc' ? 'asc' : 'desc';
+            } else {
+                // หากเปลี่ยนคอลัมน์ใหม่ สำหรับพรรษาจะเริ่มจากมากไปน้อย (desc) ส่วนข้อความจะเริ่มจาก ก-ฮ (asc)
+                currentSortColumn = column;
+                currentSortOrder = column === 'vassa' ? 'desc' : 'asc';
+            }
+
+            // จัดการการแสดงผลของไอคอนบนหัวตาราง
+            const cols = ['vassa', 'temple', 'province'];
+            cols.forEach(col => {
+                const iconEl = document.getElementById(`sort-${col}-icon`);
+                if (iconEl) {
+                    if (col === currentSortColumn) {
+                        iconEl.innerText = currentSortOrder === 'desc' ? '🔽' : '🔼';
+                        iconEl.classList.remove('opacity-50'); // ทำให้ไอคอนสว่างขึ้นเมื่อถูกเลือก
+                    } else {
+                        iconEl.innerText = '🔽';
+                        iconEl.classList.add('opacity-50'); // ทำให้ไอคอนจางลงเมื่อไม่ได้เลือก
+                    }
+                }
+            });
+
+            window.handleSearch();
+        }
+
+        // --- Interaction Logic ---
+        window.handleRegistration = function(personId, dayNumber, isChecked) {
+            const p = attendees.find(x => x.id === personId);
+            if (!p) return;
+            
+            let updated = { ...p };
+            if (dayNumber === 1) updated.day1 = isChecked; 
+            else updated.day2 = isChecked;
+
+            let showPhoto = false;
+
+            if (isChecked && !updated.wifi) {
+                let maxWifiNum = 0;
+                attendees.forEach(x => {
+                    if (x.wifi && x.wifi.startsWith('AI')) {
+                        const n = parseInt(x.wifi.replace('AI', ''), 10);
+                        if (!isNaN(n) && n > maxWifiNum) maxWifiNum = n;
+                    }
+                });
+
+                if (maxWifiNum < 200) {
+                    updated.wifi = `AI${(maxWifiNum + 1).toString().padStart(2, '0')}`;
+                    showPhoto = true;
+                } else {
+                    alert("รหัส WiFi ในระบบเต็มแล้ว (AI200)");
+                }
+            } else if (isChecked && updated.wifi) {
+                showPhoto = true;
+            }
+
+            // Sync to Firestore
+            if (user && attendeesRef) {
+                setDoc(doc(attendeesRef, updated.id.toString()), updated).catch(e => console.error(e));
+            } else {
+                // Offline fallback
+                Object.assign(p, updated);
+                window.handleSearch();
+            }
+
+            if (showPhoto) window.openPhotoView(updated);
+        }
+
+        // --- Profile Views ---
+        window.openProfileView = function(id) {
+            const p = attendees.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('profile-reg-id').innerText = p.regId;
+            document.getElementById('profile-name').innerText = getFullName(p);
+            document.getElementById('profile-temple').innerText = p.temple;
+            document.getElementById('profile-province').innerText = p.province;
+            document.getElementById('profile-overlay').classList.remove('hidden-view');
+        }
+
+        window.openPhotoView = function(p) {
+            currentPhotoPersonId = p.id;
+            document.getElementById('photo-reg-id').innerText = p.regId;
+            document.getElementById('photo-name').innerText = getFullName(p);
+            document.getElementById('photo-temple').innerText = p.vassa ? `${p.temple} (พรรษา ${p.vassa})` : p.temple;
+            document.getElementById('photo-province').innerText = p.province;
+            document.getElementById('photo-wifi-user').innerText = p.wifi || 'N/A';
+            document.getElementById('photo-wifi-pass').innerText = p.wifi || 'N/A';
+            window.togglePhotoEditMode(false);
+            document.getElementById('photo-overlay').classList.remove('hidden-view');
+        }
+
+        window.togglePhotoEditMode = function(edit) {
+            document.getElementById('photo-view-mode').classList.toggle('hidden-view', edit);
+            document.getElementById('photo-edit-mode').classList.toggle('hidden-view', !edit);
+            if (edit) {
+                const p = attendees.find(x => x.id === currentPhotoPersonId);
+                document.getElementById('photo-edit-prefix').value = p.prefix;
+                document.getElementById('photo-edit-firstname').value = p.firstName;
+                document.getElementById('photo-edit-lastname').value = p.lastName;
+                document.getElementById('photo-edit-temple').value = p.temple;
+                document.getElementById('photo-edit-province').value = p.province;
+            }
+        }
+
+        window.savePhotoProfile = function() {
+            const p = attendees.find(x => x.id === currentPhotoPersonId);
+            let updated = { ...p };
+            updated.prefix = document.getElementById('photo-edit-prefix').value.trim();
+            updated.firstName = document.getElementById('photo-edit-firstname').value.trim();
+            updated.lastName = document.getElementById('photo-edit-lastname').value.trim();
+            updated.temple = document.getElementById('photo-edit-temple').value.trim();
+            updated.province = document.getElementById('photo-edit-province').value.trim();
+            
+            if (user && attendeesRef) {
+                setDoc(doc(attendeesRef, updated.id.toString()), updated);
+            } else {
+                Object.assign(p, updated);
+            }
+            window.openPhotoView(updated); 
+            window.handleSearch();
+        }
+
+        window.closeProfileView = function() { document.getElementById('profile-overlay').classList.add('hidden-view'); }
+        window.closePhotoView = function() { document.getElementById('photo-overlay').classList.add('hidden-view'); }
+
+        // --- Walk-in Logic ---
+        window.openWalkInModal = function() {
+            document.getElementById('walkin-prefix').value = '';
+            document.getElementById('walkin-firstname').value = '';
+            document.getElementById('walkin-lastname').value = '';
+            document.getElementById('walkin-vassa').value = '';
+            document.getElementById('walkin-phone').value = '';
+            document.getElementById('walkin-temple').value = '';
+            document.getElementById('walkin-province').value = '';
+            
+            let maxN = 0; let pref = "DCI02";
+            attendees.forEach(p => {
+                const m = p.regId.match(/^(.*?)(\d+)$/);
+                if (m) { const n = parseInt(m[2], 10); if (n > maxN) { maxN = n; pref = m[1]; } }
+            });
+            document.getElementById('walkin-regId').value = `${pref}${(maxN + 1).toString().padStart(3, '0')}`;
+            document.getElementById('walkin-overlay').classList.remove('hidden-view');
+        }
+
+        window.saveWalkIn = function() {
+            const regId = document.getElementById('walkin-regId').value.trim();
+            const fn = document.getElementById('walkin-firstname').value.trim();
+            const temp = document.getElementById('walkin-temple').value.trim();
+            const prov = document.getElementById('walkin-province').value.trim();
+            if (!fn || !temp || !prov) { alert("กรุณากรอก ชื่อ, วัด และจังหวัด ให้ครบถ้วนครับ"); return; }
+            
+            const newId = Date.now().toString() + Math.random().toString().substr(2,4);
+            const vassaStr = document.getElementById('walkin-vassa').value.trim();
+            
+            const newPerson = {
+                id: newId, 
+                regId: regId || "WALK-000", 
+                prefix: document.getElementById('walkin-prefix').value.trim(), 
+                firstName: fn, 
+                lastName: document.getElementById('walkin-lastname').value.trim(),
+                vassa: vassaStr ? parseInt(vassaStr, 10) : null,
+                phone: document.getElementById('walkin-phone').value || "-",
+                temple: temp, 
+                province: prov, 
+                day1: false, 
+                day2: false, 
+                wifi: null, 
+                isNew: true
+            };
+
+            if (user && attendeesRef) {
+                setDoc(doc(attendeesRef, newId), newPerson);
+            } else {
+                attendees.unshift(newPerson);
+            }
+            
+            document.getElementById('searchInput').value = '';
+            window.closeWalkInModal(); 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.closeWalkInModal = function() { document.getElementById('walkin-overlay').classList.add('hidden-view'); }
+
+
+        // --- Data Import/Export/Reset/Mock ---
+        window.parseCSVLine = function(text) {
+            let ret = []; let inQuote = false; let value = '';
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"') {
+                    if (inQuote && text[i+1] === '"') { value += '"'; i++; } else inQuote = !inQuote;
+                } else if (char === ',' && !inQuote) { ret.push(value); value = '';
+                } else value += char;
+            }
+            ret.push(value); return ret;
+        }
+
+        window.importCSV = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split(/\r\n|\n/);
+                let addedCount = 0;
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    const cols = window.parseCSVLine(lines[i]);
+                    if (cols.length < 9) continue; 
+
+                    const regId = cols[1].trim();
+                    if (attendees.find(a => a.regId === regId)) continue;
+                    
+                    const fullName = cols[2].trim();
+                    let prefix = "", firstName = "", lastName = "";
+                    const nameParts = fullName.split("  ");
+                    if (nameParts.length >= 2) {
+                        lastName = nameParts.pop().trim();
+                        const firstParts = nameParts.join("  ").split(" ");
+                        prefix = firstParts[0].trim();
+                        firstName = firstParts.slice(1).join(" ").trim();
+                    } else {
+                        const parts = fullName.split(" ");
+                        prefix = parts[0] || ""; firstName = parts.slice(1).join(" ") || "";
+                    }
+
+                    const vassa = cols[3].trim() === '-' ? null : parseInt(cols[3].trim(), 10);
+                    const phone = cols[4].trim();
+                    const temple = cols[5].trim();
+                    const province = cols[6].trim();
+                    const day1 = cols[7].trim() === 'มา';
+                    const day2 = cols[8].trim() === 'มา';
+                    const wifi = (cols[9] && cols[9].trim() !== '-') ? cols[9].trim() : null;
+
+                    const newId = Date.now().toString() + Math.random().toString().substr(2,4) + i;
+                    const newPerson = {
+                        id: newId, regId, prefix, firstName, lastName,
+                        vassa: isNaN(vassa) ? null : vassa, phone, temple, province, day1, day2, wifi, isNew: true
+                    };
+
+                    if (user && attendeesRef) {
+                        setDoc(doc(attendeesRef, newId), newPerson);
+                    } else {
+                        attendees.unshift(newPerson);
+                    }
+                    addedCount++;
+                }
+                alert(`นำเข้าข้อมูลสำเร็จจำนวน ${addedCount} รายการ \n(ข้ามข้อมูลที่มีรหัสประจำตัวซ้ำในระบบ)`);
+                event.target.value = '';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            reader.readAsText(file);
+        }
+
+        window.exportCSV = function() {
+            let csv = "\uFEFFลำดับ,รหัสประจำตัว,ชื่อ - สกุล / ฉายา,พรรษา,เบอร์โทร,วัด,จังหวัด,วัน 1,วัน 2,WiFi\n";
+            // คัดลอกแล้วนำมาเรียงตามรหัสประจำตัว หรือ ID เวลาพิมพ์รายงาน
+            let exportData = [...attendees].sort((a,b) => String(a.regId).localeCompare(String(b.regId)));
+            
+            exportData.forEach((p, i) => {
+                const name = getFullName(p);
+                csv += `${i+1},${p.regId},"${name}",${p.vassa || '-'},${p.phone},${p.temple},${p.province},${p.day1?'มา':'ไม่'},${p.day2?'มา':'ไม่'},${p.wifi||'-'}\n`;
+            });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            link.download = "รายงานลงทะเบียน.csv";
+            link.click();
+        }
+
+        window.exportFilteredCSV = function() {
+            let csv = "\uFEFFลำดับ,รหัสประจำตัว,ชื่อ - สกุล / ฉายา,พรรษา,เบอร์โทร,วัด,จังหวัด,วัน 1,วัน 2,WiFi\n";
+            
+            let filteredUsers = [];
+            if (window.currentSummaryFilter === 'all') {
+                filteredUsers = attendees.filter(p => p.day1 || p.day2);
+            } else if (window.currentSummaryFilter === 'day1') {
+                filteredUsers = attendees.filter(p => p.day1);
+            } else if (window.currentSummaryFilter === 'day2') {
+                filteredUsers = attendees.filter(p => p.day2);
+            } else if (window.currentSummaryFilter === 'both') {
+                filteredUsers = attendees.filter(p => p.day1 && p.day2);
+            }
+
+            let exportData = [...filteredUsers].sort((a,b) => String(a.regId).localeCompare(String(b.regId)));
+            
+            exportData.forEach((p, i) => {
+                const name = getFullName(p);
+                csv += `${i+1},${p.regId},"${name}",${p.vassa || '-'},${p.phone},${p.temple},${p.province},${p.day1?'มา':'ไม่'},${p.day2?'มา':'ไม่'},${p.wifi||'-'}\n`;
+            });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            let filterName = window.currentSummaryFilter === 'both' ? 'มาทั้ง2วัน' : window.currentSummaryFilter;
+            link.download = `รายงานเฉพาะกลุ่ม_${filterName}.csv`;
+            link.click();
+        }
+
+        window.resetData = function() {
+            const confirmReset = confirm("คำเตือน: คุณแน่ใจหรือไม่ที่จะลบ 'รายชื่อและข้อมูลทั้งหมด' ออกจากระบบคลาวด์?\n\n* หากลบแล้วจะไม่สามารถกู้คืนได้ แนะนำให้ดึงข้อมูล (Export) เก็บไว้ก่อนครับ *");
+            if (confirmReset) {
+                if (user && attendeesRef) {
+                    attendees.forEach(p => {
+                        deleteDoc(doc(attendeesRef, p.id.toString()));
+                    });
+                } else {
+                    attendees = [];
+                    window.handleSearch();
+                }
+                alert("ดำเนินการลบข้อมูลทั้งหมดในระบบเรียบร้อยแล้วครับ");
+            }
+        }
+
+        window.generateMockData = function() {
+            if (!user || !attendeesRef) { alert('ต้องเชื่อมต่อ Cloud ก่อนครับ'); return; }
+            const firstNames = ["กิตติ", "วิชาญ", "ประเสริฐ", "สมศักดิ์", "วิชัย", "สมชาย", "มานพ"];
+            const lastNames = ["รักสงบ", "สิริจนฺโท", "ธมฺมทินฺโน", "ชุติมนฺโต", "ฐิตธมฺโม", "ใจดี"];
+            const temples = ["วัดระฆัง", "วัดอรุณราชวราราม", "วัดสระเกศ", "วัดบวรนิเวศ"];
+            const provs = ["กรุงเทพฯ", "อยุธยา", "ปทุมธานี", "นครปฐม"];
+            
+            let maxN = 0;
+            attendees.forEach(p => {
+                const m = p.regId.match(/^(.*?)(\d+)$/);
+                if (m) { const n = parseInt(m[2], 10); if (n > maxN) maxN = n; }
+            });
+
+            for (let i = 1; i <= 50; i++) {
+                let regIdNum = (maxN + i).toString().padStart(3, '0');
+                const newId = Date.now().toString() + Math.random().toString().substr(2,4) + i;
+                let isMonk = Math.random() > 0.3; // 70% พระ
+                const newPerson = {
+                    id: newId,
+                    regId: `DCI02${regIdNum}`,
+                    vassa: isMonk ? Math.floor(Math.random() * 30) + 1 : null,
+                    phone: `08${Math.floor(Math.random() * 10000000).toString().padStart(8, '0')}`,
+                    prefix: isMonk ? "พระมหา" : "นาย",
+                    firstName: firstNames[Math.floor(Math.random() * firstNames.length)],
+                    lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
+                    temple: temples[Math.floor(Math.random() * temples.length)],
+                    province: provs[Math.floor(Math.random() * provs.length)],
+                    day1: false, day2: false, wifi: null, isNew: false
+                };
+                setDoc(doc(attendeesRef, newId), newPerson);
+            }
+            alert("สร้างรายชื่อทดสอบเข้าระบบ 50 รูป/คน เรียบร้อยแล้วครับ");
+        }
+
+        // --- Dashboard Update & Filter ---
+        window.filterSummary = function(type) {
+            window.currentSummaryFilter = type;
+            let filteredUsers = [];
+            let label = "";
+
+            if (type === 'all') {
+                filteredUsers = attendees.filter(p => p.day1 || p.day2);
+                label = "(ทั้งหมด)";
+            } else if (type === 'day1') {
+                filteredUsers = attendees.filter(p => p.day1);
+                label = "(เฉพาะที่มาวันที่ 1)";
+            } else if (type === 'day2') {
+                filteredUsers = attendees.filter(p => p.day2);
+                label = "(เฉพาะที่มาวันที่ 2)";
+            } else if (type === 'both') {
+                filteredUsers = attendees.filter(p => p.day1 && p.day2);
+                label = "(เฉพาะที่มาครบ 2 วัน)";
+            }
+
+            document.getElementById('summary-filter-label').innerText = label;
+
+            const body = document.getElementById('summaryTableBody');
+            // ปรับขนาดอักษรในตารางสรุปผล
+            body.innerHTML = filteredUsers.map(p => `
+                <tr>
+                    <td class="p-3 border-b font-bold text-base md:text-lg">${p.regId}</td>
+                    <td class="p-3 border-b name-display text-base md:text-lg">${getFullName(p)}</td>
+                    <td class="p-3 border-b text-base md:text-lg">${p.province}</td>
+                    <td class="p-3 border-b text-center text-base md:text-lg">${p.day1 ? '✅' : '-'}</td>
+                    <td class="p-3 border-b text-center text-base md:text-lg">${p.day2 ? '✅' : '-'}</td>
+                    <td class="p-3 border-b text-center font-mono text-sm md:text-base">${p.wifi || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        window.updateDashboard = function() {
+            let t = 0, d1 = 0, d2 = 0, both = 0;
+            attendees.forEach(p => {
+                if (p.day1 || p.day2) t++;
+                if (p.day1) d1++; 
+                if (p.day2) d2++;
+                if (p.day1 && p.day2) both++;
+            });
+            document.getElementById('stat-total').innerText = t;
+            document.getElementById('stat-day1').innerText = d1;
+            document.getElementById('stat-day2').innerText = d2;
+            document.getElementById('stat-both').innerText = both;
+            
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: ['วันที่ 1', 'วันที่ 2'], datasets: [{ data: [d1, d2], backgroundColor: ['rgba(249, 115, 22, 0.8)', 'rgba(34, 197, 94, 0.8)'], borderWidth: 1 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // Initialize or retain the filter status
+            if (!window.currentSummaryFilter) window.currentSummaryFilter = 'all';
+            window.filterSummary(window.currentSummaryFilter);
+        }
+
+        // Initial render fallback (will be overwritten by Firestore if online)
+        window.onload = () => {
+            window.handleSearch();
+        };
+    </script>
 </body>
 </html>
